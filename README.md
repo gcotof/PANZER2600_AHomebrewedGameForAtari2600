@@ -56,3 +56,14 @@ El Makefile recompila cuando cambia `main.asm`, cualquier `src/*.asm` o
 `include/*.inc`. Si Stella esta instalada como app y no como comando en PATH,
 usa `make run STELLA='open -a Stella'` (macOS). Para cambiar el ejecutable
 DASM, usa `make DASM=/ruta/a/dasm`.
+
+## Milestone 2.4 - Campo de tiro (experimental)
+
+- Blanco 8x8 dibujado con Player 1 (P1), inicialmente a la derecha y arriba.
+- Impacto mediante latch TIA CXM0P (bit 7: M0 contra P1); CXCLR reinicia colisiones por cuadro.
+- Tras el impacto, el blanco desaparece 45 cuadros y reaparece en una de dos posiciones.
+- `TargetHits` en RAM cuenta los aciertos (se reinicia al desbordar 255).
+- Controles y carga del disparo se mantienen iguales.
+- `make compare` ahora **no** debe coincidir: la ROM contiene nuevas mecánicas.
+
+**Nota:** este milestone no se ha compilado ni ejecutado en Stella en este entorno. En particular, revisa el numero de scanlines del kernel con el debugger de Stella: se agrego logica por linea para dibujar P1 y puede requerir optimizacion si aparecen lineas inestables.

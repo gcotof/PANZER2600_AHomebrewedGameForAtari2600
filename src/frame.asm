@@ -14,6 +14,7 @@ Frame:
     jsr HandleFire
     jsr UpdateRecoil
     jsr UpdateBullet
+    jsr UpdateTarget
 
     ; Color del tanque: se aclara mientras se carga el disparo.
     lda FireCharge
@@ -75,6 +76,10 @@ ComposeLoop:
     ldx #0                 ; 0 = player 0
     jsr SetHorizPos
 
+    lda TargetX
+    ldx #1
+    jsr SetHorizPos
+
     lda #0
     sta HMM0               ; sin movimiento fino si no hay bala
     lda BulletActive
@@ -93,6 +98,7 @@ WaitBlank:
     sta VBLANK             ; A = 0: enciende video
     sta TankByte           ; la fila 0 nunca tiene tanque ni bala
     sta MissileVal
+    sta TargetByte
     ldx #0
 
 ; Kernel: GRP0 y ENAM0 se escriben al INICIO de la linea (todavia en HBLANK),

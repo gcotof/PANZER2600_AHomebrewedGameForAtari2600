@@ -27,3 +27,9 @@ RecoilDX      = $A0    ; paso de retroceso (con signo)
 RecoilDY      = $A1
 FlashFrames   = $A2    ; frames de destello del fondo que faltan
 
+
+TargetX = $A3
+TargetY = $A4
+TargetByte = $A5
+TargetRespawn = $A6
+TargetHits = $A7

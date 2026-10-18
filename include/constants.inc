@@ -5,3 +5,6 @@ FLASH_LEN     = 2      ; frames de destello al disparar
 BG_COLOR      = $22
 FLASH_COLOR   = $2E
 
+
+TARGET_RESPAWN_FRAMES = 45
+TARGET_COLOR = $3A

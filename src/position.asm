@@ -1,5 +1,5 @@
 ; Posicionamiento horizontal generico (misma rutina validada).
-; Entrada: A = posicion X; X = 0 (player 0) o 2 (missile 0).
+; Entrada: A = posicion X; X = 0 (player 0), 1 (player 1) o 2 (missile 0).
 ; RESP0,x y HMP0,x apuntan a RESM0 y HMM0 cuando X = 2.
 ; NO hace HMOVE: el llamador lo hace una sola vez al final.
 SetHorizPos:

@@ -25,7 +25,17 @@ ClearRAM:
     sta BulletDelay
     sta GRP0
     sta ENAM0
+    sta GRP1
+    sta NUSIZ1
+    sta TargetRespawn
+    sta TargetHits
     sta NUSIZ0             ; single player, missile width 1
+    lda #112
+    sta TargetX
+    lda #64
+    sta TargetY
+    lda #TARGET_COLOR
+    sta COLUP1
     lda #$86
     sta COLUP0
     lda #$22

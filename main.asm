@@ -1,4 +1,4 @@
-; ARMOR DUEL 2600 - Milestone 2.3: charged shot + recoil
+; ARMOR DUEL 2600 - Milestone 2.4: charged shot + recoil
 ; Joystick: up/down drive, left/right hull, fire+left/right turret.
 ; Hold fire (without turning the turret) for FIRE_HOLD frames to shoot.
 ; Rotating the turret resets the charge. The tank brightens while charging.
@@ -19,6 +19,7 @@
     include "src/projectile.asm"
     include "src/recoil.asm"
     include "src/bullet.asm"
+    include "src/target.asm"
     include "src/directions.asm"
     include "src/position.asm"
     include "src/sprites.asm"

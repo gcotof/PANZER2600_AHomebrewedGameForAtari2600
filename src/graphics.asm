@@ -3,6 +3,8 @@ Visible:
     sta GRP0
     lda MissileVal
     sta ENAM0
+    lda TargetByte
+    sta GRP1
 
     inx                    ; calcular datos de la fila siguiente
 
@@ -31,6 +33,20 @@ NoTankRow:
 StoreTank:
     sta TankByte
 
+    lda TargetRespawn
+    bne NoTargetRow
+    txa
+    sec
+    sbc TargetY
+    cmp #8
+    bcs NoTargetRow
+    lda #$FF
+    bne StoreTarget
+NoTargetRow:
+    lda #0
+StoreTarget:
+    sta TargetByte
+
     cpx #192
     sta WSYNC
     bne Visible
@@ -38,6 +54,7 @@ StoreTank:
     lda #0
     sta GRP0
     sta ENAM0
+    sta GRP1
     lda #2
     sta VBLANK
     ldx #30
