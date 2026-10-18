@@ -1,4 +1,4 @@
-    processor 6502
+	processor 6502
 
 VSYNC   = $00
 VBLANK  = $01
@@ -28,13 +28,17 @@ SpriteBase = $89  ; Offset del dibujo seleccionado (Facing * 8)
 Reset:
     sei
     cld
-    ldx #$FF
-    txs
-    lda #0
+    ; Limpia toda la RAM y el TIA ($00-$FF) y deja S=$FF.
+    ; txs coloca S en X y pha escribe A (=0) en esa direccion.
+    ldx #0
+    txa
 ClearRAM:
-    sta $80,x
     dex
+    txs
+    pha
     bne ClearRAM
+    ; Aqui A=0, X=0 y S=$FF.
+
     lda #76
     sta TankX
     lda #88
@@ -226,8 +230,8 @@ DeltaY:
     .byte $FF, $FF, 0, 1, 1, 1, 0, $FF
 
 PositionPlayer:
-    ; Rutina validada en Stella por el desarrollador.
     ; IMPORTANTE: SEC va antes de WSYNC, NO dentro del bucle.
+    ; Cada vuelta dura 5 ciclos (sbc 2 + bcs 3) = 15 pixeles.
     lda TankX
     sec
     sta WSYNC
@@ -247,7 +251,7 @@ Divide15:
 
 ; Ocho siluetas de casco vistas desde arriba.
 ; Cada bloque tiene exactamente 8 bytes: fila 0 a fila 7.
-; El cañón/torreta independiente vendrá en Milestone 2.
+; El canon/torreta independiente vendra en Milestone 2.
 TankSprites:
 ; 0 Norte: frente angosto arriba, orugas a los lados
     .byte %00011000
