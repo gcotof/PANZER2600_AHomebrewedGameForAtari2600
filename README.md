@@ -1,14 +1,15 @@
-# untitledTankGame 2600 — Milestone 0 (smoke test)
+# ARMOR DUEL 2600 — Milestone 1.1
 
-macOS (Apple Silicon or Intel):
+Changes from Milestone 1:
+- Drive movement every 3 frames instead of every frame.
+- Diagonal movement alternates horizontal and vertical pixel steps, reducing diagonal speed and avoiding simultaneous X/Y jumps.
+- Turning remains one 45-degree step every 6 frames.
+
+Build on macOS:
 
 ```sh
-brew install dasm stella
-cd armor-duel-2600
 dasm main.asm -f3 -oarmor_duel.bin
 stella armor_duel.bin
 ```
 
-This is an intentionally minimal 4 KiB Atari 2600 ROM source. It displays an 8-pixel-wide tank placeholder and reads the left joystick. Up/down moves the placeholder vertically; left/right updates an internal Facing byte but does not yet affect movement or visuals. No turret, firing, two-button input, or coprocessor support yet. This is a hardware/graphics smoke test, not a playable tank game.
-
-Next: implement eight-direction fixed-point movement and independent turret state, then investigate display kernels and enhanced cartridges. Stella compatibility does not imply Atari 2600+ compatibility.
+Not yet verified with a local DASM executable. If horizontal snapping remains, investigate the TIA RESP0/HMP0 positioning routine separately. This version deliberately does not add acceleration or friction yet.

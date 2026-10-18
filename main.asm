@@ -20,6 +20,8 @@ Row     = $83
 TurnDelay = $84
 StepX   = $85
 StepY   = $86
+DriveDelay = $87
+DiagonalPhase = $88
 
     org $F000
 Reset:
@@ -129,6 +131,11 @@ CheckRight:
 ReadDrive:
     ; Joystick up = forward, down = reverse.
     ; The lookup tables contain signed 8-bit deltas.
+    lda DriveDelay
+    beq DriveReady
+    dec DriveDelay
+    rts
+DriveReady:
     lda SWCHA
     and #$10
     bne CheckReverse
@@ -137,7 +144,7 @@ ReadDrive:
     sta StepX
     lda DeltaY,x
     sta StepY
-    jsr ApplyStep
+    jsr MoveSlow
     rts
 CheckReverse:
     lda SWCHA
@@ -154,8 +161,31 @@ CheckReverse:
     clc
     adc #1
     sta StepY
-    jsr ApplyStep
+    jsr MoveSlow
 DriveDone:
+    rts
+
+MoveSlow:
+    ; One movement step every 3 frames (current frame plus 2 waiting).
+    lda #2
+    sta DriveDelay
+    ; Diagonals alternate X and Y instead of stepping both at once.
+    lda StepX
+    beq MoveNow
+    lda StepY
+    beq MoveNow
+    lda DiagonalPhase
+    eor #1
+    sta DiagonalPhase
+    beq OnlyX
+    lda #0
+    sta StepX
+    jmp MoveNow
+OnlyX:
+    lda #0
+    sta StepY
+MoveNow:
+    jsr ApplyStep
     rts
 
 ApplyStep:
@@ -188,19 +218,20 @@ DeltaY:
 
 PositionPlayer:
     lda TankX
-    ldx #0
+    sec                 ; fuera del bucle
     sta WSYNC
 Divide15:
-    sec
-    sbc #15
-    bcs Divide15
+    sbc #15             ; 2 ciclos
+    bcs Divide15        ; 3 ciclos  -> 5 ciclos = 15 px por iteración
+
     eor #7
     asl
     asl
     asl
     asl
-    sta HMP0
-    sta RESP0
+    sta RESP0           ; posición gruesa
+    sta HMP0            ; ajuste fino
+
     sta WSYNC
     sta HMOVE
     rts
