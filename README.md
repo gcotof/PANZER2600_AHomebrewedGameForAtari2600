@@ -1,15 +1,31 @@
-# ARMOR DUEL 2600 — Milestone 1.1
+# ARMOR DUEL 2600 — Milestone 1.2
 
-Changes from Milestone 1:
-- Drive movement every 3 frames instead of every frame.
-- Diagonal movement alternates horizontal and vertical pixel steps, reducing diagonal speed and avoiding simultaneous X/Y jumps.
-- Turning remains one 45-degree step every 6 frames.
+## Objetivo
+Ocho orientaciones visuales del casco (8×8) sin cambiar la física ni los controles del Milestone 1.1.
 
-Build on macOS:
-
+## Compilar en macOS
 ```sh
 dasm main.asm -f3 -oarmor_duel.bin
 stella armor_duel.bin
 ```
 
-Not yet verified with a local DASM executable. If horizontal snapping remains, investigate the TIA RESP0/HMP0 positioning routine separately. This version deliberately does not add acceleration or friction yet.
+## Controles
+- Izquierda/derecha: girar el casco 45 grados cada seis cuadros.
+- Arriba: avanzar según Facing.
+- Abajo: retroceder según Facing.
+
+## Cómo funciona
+`SpriteBase = Facing * 8` se calcula una vez por cuadro.
+En cada línea visible, se calcula `Row - TankY`. Si está entre 0 y 7,
+se suma `SpriteBase` y se lee un byte de `TankSprites`.
+Cada orientación ocupa ocho bytes consecutivos de ROM.
+
+## Importante
+Se conservó **literalmente** la rutina `PositionPlayer` aportada por el usuario,
+con `SEC` fuera del bucle y escritura `RESP0` antes de `HMP0`.
+No se cambió la velocidad, el control de diagonales ni los límites.
+
+## Pendiente
+- Estas siluetas son provisionales, no sprites definitivos de tanques.
+- La torreta independiente se desarrollará en el Milestone 2.
+- Verificar en Stella el aspecto y el timing antes de optimizar.

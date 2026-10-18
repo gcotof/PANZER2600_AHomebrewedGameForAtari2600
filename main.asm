@@ -22,6 +22,7 @@ StepX   = $85
 StepY   = $86
 DriveDelay = $87
 DiagonalPhase = $88
+SpriteBase = $89  ; Offset del dibujo seleccionado (Facing * 8)
 
     org $F000
 Reset:
@@ -59,6 +60,12 @@ Frame:
     lda #43
     sta TIM64T
     jsr Controls
+    ; Calculamos el offset UNA vez por frame, no por scanline.
+    lda Facing
+    asl
+    asl
+    asl
+    sta SpriteBase
     jsr PositionPlayer
 WaitBlank:
     lda INTIM
@@ -74,8 +81,10 @@ Visible:
     sbc TankY
     cmp #8
     bcs NoTank
+    clc
+    adc SpriteBase
     tay
-    lda TankSprite,y
+    lda TankSprites,y
     jmp DrawRow
 NoTank:
     lda #0
@@ -217,33 +226,100 @@ DeltaY:
     .byte $FF, $FF, 0, 1, 1, 1, 0, $FF
 
 PositionPlayer:
+    ; Rutina validada en Stella por el desarrollador.
+    ; IMPORTANTE: SEC va antes de WSYNC, NO dentro del bucle.
     lda TankX
-    sec                 ; fuera del bucle
+    sec
     sta WSYNC
 Divide15:
-    sbc #15             ; 2 ciclos
-    bcs Divide15        ; 3 ciclos  -> 5 ciclos = 15 px por iteración
-
+    sbc #15
+    bcs Divide15
     eor #7
     asl
     asl
     asl
     asl
-    sta RESP0           ; posición gruesa
-    sta HMP0            ; ajuste fino
-
+    sta RESP0
+    sta HMP0
     sta WSYNC
     sta HMOVE
     rts
 
-TankSprite:
+; Ocho siluetas de casco vistas desde arriba.
+; Cada bloque tiene exactamente 8 bytes: fila 0 a fila 7.
+; El cañón/torreta independiente vendrá en Milestone 2.
+TankSprites:
+; 0 Norte: frente angosto arriba, orugas a los lados
+    .byte %00011000
     .byte %00111100
-    .byte %01111110
     .byte %11111111
     .byte %11011011
     .byte %11011011
     .byte %11111111
     .byte %01111110
+    .byte %01100110
+; 1 Noreste
+    .byte %00000111
+    .byte %00001111
+    .byte %00111110
+    .byte %01111100
+    .byte %11111000
+    .byte %11111000
+    .byte %01111100
+    .byte %00111100
+; 2 Este
+    .byte %00111100
+    .byte %01111100
+    .byte %11111110
+    .byte %11111111
+    .byte %11111111
+    .byte %11111110
+    .byte %01111100
+    .byte %00111100
+; 3 Sureste
+    .byte %00111100
+    .byte %01111100
+    .byte %11111000
+    .byte %11111000
+    .byte %01111100
+    .byte %00111110
+    .byte %00001111
+    .byte %00000111
+; 4 Sur
+    .byte %01100110
+    .byte %01111110
+    .byte %11111111
+    .byte %11011011
+    .byte %11011011
+    .byte %11111111
+    .byte %00111100
+    .byte %00011000
+; 5 Suroeste
+    .byte %00111100
+    .byte %00111110
+    .byte %00011111
+    .byte %00011111
+    .byte %00111110
+    .byte %01111100
+    .byte %11110000
+    .byte %11100000
+; 6 Oeste
+    .byte %00111100
+    .byte %00111110
+    .byte %01111111
+    .byte %11111111
+    .byte %11111111
+    .byte %01111111
+    .byte %00111110
+    .byte %00111100
+; 7 Noroeste
+    .byte %11100000
+    .byte %11110000
+    .byte %01111100
+    .byte %00111110
+    .byte %00011111
+    .byte %00011111
+    .byte %00111110
     .byte %00111100
 
     org $FFFC
