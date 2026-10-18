@@ -1,0 +1,19 @@
+VSYNC   = $00
+VBLANK  = $01
+WSYNC   = $02
+NUSIZ0  = $04
+COLUP0  = $06
+COLUP1  = $07
+COLUBK  = $09
+INPT4   = $0C
+RESP0   = $10
+RESM0   = $12
+GRP0    = $1B
+ENAM0   = $1D
+HMP0    = $20
+HMM0    = $22
+HMOVE   = $2A
+SWCHA   = $0280
+INTIM   = $0284
+TIM64T  = $0296
+
