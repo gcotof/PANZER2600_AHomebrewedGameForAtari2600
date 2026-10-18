@@ -1,6 +1,8 @@
-; ARMOR DUEL 2600 - Milestone 2.2: projectile + stable positioning
+; ARMOR DUEL 2600 - Milestone 2.3: charged shot + recoil
 ; Joystick: up/down drive, left/right hull, fire+left/right turret.
-; Tap fire without turning to launch one projectile.
+; Hold fire (without turning the turret) for FIRE_HOLD frames to shoot.
+; Rotating the turret resets the charge. The tank brightens while charging.
+; Firing kicks the tank backwards (recoil) and flashes the background.
 ;
 ; NOTA: "processor 6502" DEBE ir con sangria (espacios o tab), nunca en la columna 0.
 
@@ -48,6 +50,18 @@ BulletDelay   = $93
 CompositeRows = $94    ; 8 bytes: $94..$9B
 TankByte      = $9C    ; GRP0 de la siguiente scanline
 MissileVal    = $9D    ; ENAM0 de la siguiente scanline
+FireCharge    = $9E    ; frames que lleva cargandose el disparo
+RecoilFrames  = $9F    ; frames de retroceso que faltan
+RecoilDX      = $A0    ; paso de retroceso (con signo)
+RecoilDY      = $A1
+FlashFrames   = $A2    ; frames de destello del fondo que faltan
+
+; --- Ajustes de sensacion (cambia estos valores a tu gusto) ---
+FIRE_HOLD     = 180    ; frames para cargar el disparo (180 = 3 s a 60 Hz)
+RECOIL_LEN    = 5      ; frames de retroceso, 1 px por frame (= 5 px)
+FLASH_LEN     = 2      ; frames de destello al disparar
+BG_COLOR      = $22
+FLASH_COLOR   = $2E
 
     org $F000
 Reset:
@@ -96,7 +110,29 @@ Frame:
 
     jsr Controls
     jsr HandleFire
+    jsr UpdateRecoil
     jsr UpdateBullet
+
+    ; Color del tanque: se aclara mientras se carga el disparo.
+    lda FireCharge
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr                    ; 0..5 con FIRE_HOLD = 180
+    clc
+    adc #6
+    ora #$80               ; $86 en reposo, hasta $8B cargado
+    sta COLUP0
+
+    ; Destello del fondo al disparar.
+    lda #BG_COLOR
+    ldx FlashFrames
+    beq SetBackground
+    dec FlashFrames
+    lda #FLASH_COLOR
+SetBackground:
+    sta COLUBK
 
     lda Facing
     asl
@@ -333,21 +369,46 @@ SkipX:
 SkipY:
     rts
 
-; Fire is edge-triggered: one shot per button press.
-; Holding left/right with fire only rotates the turret.
+; Charged shot: keep fire held for FIRE_HOLD frames without rotating the turret.
+; Left/right while holding fire rotates the turret and resets the charge.
+; After shooting, the button must be released before charging again.
 HandleFire:
     lda INPT4
     bmi FireReleased
     lda FireLatch
-    bne FireDone
-    lda #1
-    sta FireLatch
+    bne FireDone           ; ya disparo en esta pulsacion
     lda SWCHA
     and #$C0
     cmp #$C0
-    bne FireDone
+    bne ChargeReset        ; girando la torreta: reinicia la carga
+    lda FireCharge
+    cmp #FIRE_HOLD
+    bcs ChargeFull
+    inc FireCharge
+    rts
+ChargeFull:
     lda BulletActive
-    bne FireDone
+    bne FireDone           ; cargado, esperando que la bala anterior termine
+    lda #1
+    sta FireLatch
+    lda #0
+    sta FireCharge
+    ; Retroceso: direccion opuesta a la torreta.
+    ldx TurretFacing
+    lda DeltaX,x
+    eor #$FF
+    clc
+    adc #1
+    sta RecoilDX
+    lda DeltaY,x
+    eor #$FF
+    clc
+    adc #1
+    sta RecoilDY
+    lda #RECOIL_LEN
+    sta RecoilFrames
+    lda #FLASH_LEN
+    sta FlashFrames
     ; Spawn approximately at the center of the 8x8 sprite.
     lda TankX
     clc
@@ -368,9 +429,28 @@ HandleFire:
     sta BulletDelay
 FireDone:
     rts
+ChargeReset:
+    lda #0
+    sta FireCharge
+    rts
 FireReleased:
     lda #0
     sta FireLatch
+    sta FireCharge
+    rts
+
+; Recoil: 1 pixel per frame opposite to the turret, for RECOIL_LEN frames.
+; ApplyStep keeps the tank inside the arena.
+UpdateRecoil:
+    lda RecoilFrames
+    beq RecoilDone
+    dec RecoilFrames
+    lda RecoilDX
+    sta StepX
+    lda RecoilDY
+    sta StepY
+    jsr ApplyStep
+RecoilDone:
     rts
 
 ; Bullet moves one pixel in each active axis every 3 frames.
