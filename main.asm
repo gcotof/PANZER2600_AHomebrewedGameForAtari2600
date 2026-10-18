@@ -17,6 +17,9 @@ TankX   = $80
 TankY   = $81
 Facing  = $82
 Row     = $83
+TurnDelay = $84
+StepX   = $85
+StepY   = $86
 
     org $F000
 Reset:
@@ -35,6 +38,7 @@ ClearRAM:
     sta TankY
     lda #0
     sta Facing
+    sta TurnDelay
     sta GRP0
     lda #$86
     sta COLUP0
@@ -92,34 +96,95 @@ Overscan:
     jmp Frame
 
 Controls:
+    ; Facing: 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW.
+    ; Turning is throttled to one 45-degree step every six frames.
+    lda TurnDelay
+    beq ReadTurn
+    dec TurnDelay
+    jmp ReadDrive
+ReadTurn:
     lda SWCHA
     and #$40
-    bne NoLeft
-    dec Facing
-NoLeft:
+    bne CheckRight
+    lda Facing
+    sec
+    sbc #1
+    and #7
+    sta Facing
+    lda #5
+    sta TurnDelay
+    jmp ReadDrive
+CheckRight:
     lda SWCHA
     and #$80
-    bne NoRight
-    inc Facing
-NoRight:
-    ; Milestone 0: up/down move on screen.
-    ; Next milestone: movement follows Facing using direction vectors.
+    bne ReadDrive
+    lda Facing
+    clc
+    adc #1
+    and #7
+    sta Facing
+    lda #5
+    sta TurnDelay
+
+ReadDrive:
+    ; Joystick up = forward, down = reverse.
+    ; The lookup tables contain signed 8-bit deltas.
     lda SWCHA
     and #$10
-    bne NoUp
-    lda TankY
-    beq NoUp
-    dec TankY
-NoUp:
+    bne CheckReverse
+    ldx Facing
+    lda DeltaX,x
+    sta StepX
+    lda DeltaY,x
+    sta StepY
+    jsr ApplyStep
+    rts
+CheckReverse:
     lda SWCHA
     and #$20
-    bne NoDown
-    lda TankY
-    cmp #184
-    bcs NoDown
-    inc TankY
-NoDown:
+    bne DriveDone
+    ldx Facing
+    lda DeltaX,x
+    eor #$FF
+    clc
+    adc #1
+    sta StepX
+    lda DeltaY,x
+    eor #$FF
+    clc
+    adc #1
+    sta StepY
+    jsr ApplyStep
+DriveDone:
     rts
+
+ApplyStep:
+    ; Accept only positions 8..150 horizontally, 8..184 vertically.
+    lda TankX
+    clc
+    adc StepX
+    cmp #8
+    bcc SkipX
+    cmp #151
+    bcs SkipX
+    sta TankX
+SkipX:
+    lda TankY
+    clc
+    adc StepY
+    cmp #8
+    bcc SkipY
+    cmp #185
+    bcs SkipY
+    sta TankY
+SkipY:
+    rts
+
+; Clockwise directions, starting at north (screen Y increases down).
+DeltaX:
+    .byte 0, 1, 1, 1, 0, $FF, $FF, $FF
+DeltaY:
+    .byte $FF, $FF, 0, 1, 1, 1, 0, $FF
 
 PositionPlayer:
     lda TankX
