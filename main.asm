@@ -1,35 +1,58 @@
+; ARMOR DUEL 2600 - Milestone 2.2: projectile + stable positioning
+; Joystick: up/down drive, left/right hull, fire+left/right turret.
+; Tap fire without turning to launch one projectile.
+;
+; NOTA: "processor 6502" DEBE ir con sangria (espacios o tab), nunca en la columna 0.
+
 	processor 6502
 
 VSYNC   = $00
 VBLANK  = $01
 WSYNC   = $02
+NUSIZ0  = $04
 COLUP0  = $06
+COLUP1  = $07
 COLUBK  = $09
-GRP0    = $1B
+INPT4   = $0C
 RESP0   = $10
+RESM0   = $12
+GRP0    = $1B
+ENAM0   = $1D
 HMP0    = $20
+HMM0    = $22
 HMOVE   = $2A
 SWCHA   = $0280
-TIM64T  = $0296
 INTIM   = $0284
+TIM64T  = $0296
 
-TankX   = $80
-TankY   = $81
-Facing  = $82
-Row     = $83
-TurnDelay = $84
-StepX   = $85
-StepY   = $86
-DriveDelay = $87
+TankX         = $80
+TankY         = $81
+Facing        = $82
+Row           = $83
+TurnDelay     = $84
+StepX         = $85
+StepY         = $86
+DriveDelay    = $87
 DiagonalPhase = $88
-SpriteBase = $89  ; Offset del dibujo seleccionado (Facing * 8)
+SpriteBase    = $89
+TurretFacing  = $8A
+TurretBase    = $8B
+HullRow       = $8C
+BulletX       = $8D
+BulletY       = $8E
+BulletDX      = $8F
+BulletDY      = $90
+BulletActive  = $91
+FireLatch     = $92
+BulletDelay   = $93
+CompositeRows = $94    ; 8 bytes: $94..$9B
+TankByte      = $9C    ; GRP0 de la siguiente scanline
+MissileVal    = $9D    ; ENAM0 de la siguiente scanline
 
     org $F000
 Reset:
     sei
     cld
-    ; Limpia toda la RAM y el TIA ($00-$FF) y deja S=$FF.
-    ; txs coloca S en X y pha escribe A (=0) en esa direccion.
     ldx #0
     txa
 ClearRAM:
@@ -37,7 +60,6 @@ ClearRAM:
     txs
     pha
     bne ClearRAM
-    ; Aqui A=0, X=0 y S=$FF.
 
     lda #76
     sta TankX
@@ -45,8 +67,16 @@ ClearRAM:
     sta TankY
     lda #0
     sta Facing
+    sta TurretFacing
     sta TurnDelay
+    sta DriveDelay
+    sta DiagonalPhase
+    sta BulletActive
+    sta FireLatch
+    sta BulletDelay
     sta GRP0
+    sta ENAM0
+    sta NUSIZ0             ; single player, missile width 1
     lda #$86
     sta COLUP0
     lda #$22
@@ -63,44 +93,113 @@ Frame:
     sta VSYNC
     lda #43
     sta TIM64T
+
     jsr Controls
-    ; Calculamos el offset UNA vez por frame, no por scanline.
+    jsr HandleFire
+    jsr UpdateBullet
+
     lda Facing
     asl
     asl
     asl
     sta SpriteBase
-    jsr PositionPlayer
-WaitBlank:
-    lda INTIM
-    bne WaitBlank
-    sta WSYNC
-    lda #0
-    sta VBLANK
-    ldx #0
-Visible:
-    stx Row
+    lda TurretFacing
+    asl
+    asl
+    asl
+    sta TurretBase
+
+    ; Precompute the 8 OR-combined rows during VBLANK.
+    ldx #7
+ComposeLoop:
     txa
-    sec
-    sbc TankY
-    cmp #8
-    bcs NoTank
     clc
     adc SpriteBase
     tay
     lda TankSprites,y
-    jmp DrawRow
-NoTank:
+    sta HullRow
+    txa
+    clc
+    adc TurretBase
+    tay
+    lda TurretSprites,y
+    ora HullRow
+    sta CompositeRows,x
+    dex
+    bpl ComposeLoop
+
+    ; --- Posicionamiento horizontal ---
+    ; Primero se fijan las posiciones gruesas (RESxx) y los ajustes finos
+    ; (HMxx) de AMBOS objetos, y al final se hace UN SOLO HMOVE.
+    ; Despues del HMOVE no se escribe ningun HMxx (el TIA tarda ~24 ciclos
+    ; en aplicarlo y escribir antes lo corrompe).
+    lda TankX
+    ldx #0                 ; 0 = player 0
+    jsr SetHorizPos
+
     lda #0
-DrawRow:
-    sta GRP0
+    sta HMM0               ; sin movimiento fino si no hay bala
+    lda BulletActive
+    beq ApplyMotion
+    lda BulletX
+    ldx #2                 ; 2 = missile 0
+    jsr SetHorizPos
+ApplyMotion:
     sta WSYNC
-    ldx Row
-    inx
+    sta HMOVE
+
+WaitBlank:
+    lda INTIM
+    bne WaitBlank          ; al salir A = 0
+    sta WSYNC
+    sta VBLANK             ; A = 0: enciende video
+    sta TankByte           ; la fila 0 nunca tiene tanque ni bala
+    sta MissileVal
+    ldx #0
+
+; Kernel: GRP0 y ENAM0 se escriben al INICIO de la linea (todavia en HBLANK),
+; usando datos calculados durante la linea anterior. Asi el tanque y la bala
+; no cambian de fila segun su posicion horizontal.
+Visible:
+    lda TankByte
+    sta GRP0
+    lda MissileVal
+    sta ENAM0
+
+    inx                    ; calcular datos de la fila siguiente
+
+    ldy #0
+    lda BulletActive
+    beq NoBulletRow
+    txa
+    sec
+    sbc BulletY
+    cmp #2
+    bcs NoBulletRow
+    ldy #2
+NoBulletRow:
+    sty MissileVal
+
+    txa
+    sec
+    sbc TankY
+    cmp #8
+    bcs NoTankRow
+    tay
+    lda CompositeRows,y
+    jmp StoreTank
+NoTankRow:
+    lda #0
+StoreTank:
+    sta TankByte
+
     cpx #192
+    sta WSYNC
     bne Visible
+
     lda #0
     sta GRP0
+    sta ENAM0
     lda #2
     sta VBLANK
     ldx #30
@@ -111,8 +210,6 @@ Overscan:
     jmp Frame
 
 Controls:
-    ; Facing: 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW.
-    ; Turning is throttled to one 45-degree step every six frames.
     lda TurnDelay
     beq ReadTurn
     dec TurnDelay
@@ -120,30 +217,48 @@ Controls:
 ReadTurn:
     lda SWCHA
     and #$40
-    bne CheckRight
+    beq TurnLeft
+    lda SWCHA
+    and #$80
+    beq TurnRight
+    jmp ReadDrive
+TurnLeft:
+    lda INPT4
+    bmi TurnHullLeft
+    lda TurretFacing
+    sec
+    sbc #1
+    and #7
+    sta TurretFacing
+    jmp TurnFinished
+TurnHullLeft:
     lda Facing
     sec
     sbc #1
     and #7
     sta Facing
-    lda #5
-    sta TurnDelay
-    jmp ReadDrive
-CheckRight:
-    lda SWCHA
-    and #$80
-    bne ReadDrive
+    jmp TurnFinished
+TurnRight:
+    lda INPT4
+    bmi TurnHullRight
+    lda TurretFacing
+    clc
+    adc #1
+    and #7
+    sta TurretFacing
+    jmp TurnFinished
+TurnHullRight:
     lda Facing
     clc
     adc #1
     and #7
     sta Facing
+TurnFinished:
     lda #5
     sta TurnDelay
+    jmp ReadDrive
 
 ReadDrive:
-    ; Joystick up = forward, down = reverse.
-    ; The lookup tables contain signed 8-bit deltas.
     lda DriveDelay
     beq DriveReady
     dec DriveDelay
@@ -177,12 +292,9 @@ CheckReverse:
     jsr MoveSlow
 DriveDone:
     rts
-
 MoveSlow:
-    ; One movement step every 3 frames (current frame plus 2 waiting).
     lda #2
     sta DriveDelay
-    ; Diagonals alternate X and Y instead of stepping both at once.
     lda StepX
     beq MoveNow
     lda StepY
@@ -200,9 +312,7 @@ OnlyX:
 MoveNow:
     jsr ApplyStep
     rts
-
 ApplyStep:
-    ; Accept only positions 8..150 horizontally, 8..184 vertically.
     lda TankX
     clc
     adc StepX
@@ -223,108 +333,157 @@ SkipX:
 SkipY:
     rts
 
-; Clockwise directions, starting at north (screen Y increases down).
+; Fire is edge-triggered: one shot per button press.
+; Holding left/right with fire only rotates the turret.
+HandleFire:
+    lda INPT4
+    bmi FireReleased
+    lda FireLatch
+    bne FireDone
+    lda #1
+    sta FireLatch
+    lda SWCHA
+    and #$C0
+    cmp #$C0
+    bne FireDone
+    lda BulletActive
+    bne FireDone
+    ; Spawn approximately at the center of the 8x8 sprite.
+    lda TankX
+    clc
+    adc #4
+    sta BulletX
+    lda TankY
+    clc
+    adc #4
+    sta BulletY
+    ldx TurretFacing
+    lda DeltaX,x
+    sta BulletDX
+    lda DeltaY,x
+    sta BulletDY
+    lda #1
+    sta BulletActive
+    lda #0
+    sta BulletDelay
+FireDone:
+    rts
+FireReleased:
+    lda #0
+    sta FireLatch
+    rts
+
+; Bullet moves one pixel in each active axis every 3 frames.
+; Diagonal bullets therefore move faster in Euclidean distance.
+UpdateBullet:
+    lda BulletActive
+    beq BulletDone
+    lda BulletDelay
+    beq BulletReady
+    dec BulletDelay
+    rts
+BulletReady:
+    lda #2
+    sta BulletDelay
+    lda BulletX
+    clc
+    adc BulletDX
+    cmp #4
+    bcc KillBullet
+    cmp #156
+    bcs KillBullet
+    sta BulletX
+    lda BulletY
+    clc
+    adc BulletDY
+    cmp #4
+    bcc KillBullet
+    cmp #188
+    bcs KillBullet
+    sta BulletY
+BulletDone:
+    rts
+KillBullet:
+    lda #0
+    sta BulletActive
+    rts
+
 DeltaX:
     .byte 0, 1, 1, 1, 0, $FF, $FF, $FF
 DeltaY:
     .byte $FF, $FF, 0, 1, 1, 1, 0, $FF
 
-PositionPlayer:
-    ; IMPORTANTE: SEC va antes de WSYNC, NO dentro del bucle.
-    ; Cada vuelta dura 5 ciclos (sbc 2 + bcs 3) = 15 pixeles.
-    lda TankX
+; Posicionamiento horizontal generico (misma rutina validada).
+; Entrada: A = posicion X; X = 0 (player 0) o 2 (missile 0).
+; RESP0,x y HMP0,x apuntan a RESM0 y HMM0 cuando X = 2.
+; NO hace HMOVE: el llamador lo hace una sola vez al final.
+SetHorizPos:
     sec
     sta WSYNC
-Divide15:
+DivideLoop:
     sbc #15
-    bcs Divide15
+    bcs DivideLoop
     eor #7
     asl
     asl
     asl
     asl
-    sta RESP0
-    sta HMP0
-    sta WSYNC
-    sta HMOVE
+    sta RESP0,x
+    sta HMP0,x
     rts
 
-; Ocho siluetas de casco vistas desde arriba.
-; Cada bloque tiene exactamente 8 bytes: fila 0 a fila 7.
-; El canon/torreta independiente vendra en Milestone 2.
+; Compact 6x6 hull with tracks. 8 orientations x 8 rows.
 TankSprites:
-; 0 Norte: frente angosto arriba, orugas a los lados
-    .byte %00011000
-    .byte %00111100
-    .byte %11111111
-    .byte %11011011
-    .byte %11011011
-    .byte %11111111
-    .byte %01111110
-    .byte %01100110
-; 1 Noreste
-    .byte %00000111
-    .byte %00001111
-    .byte %00111110
-    .byte %01111100
-    .byte %11111000
-    .byte %11111000
-    .byte %01111100
-    .byte %00111100
-; 2 Este
-    .byte %00111100
-    .byte %01111100
-    .byte %11111110
-    .byte %11111111
-    .byte %11111111
-    .byte %11111110
-    .byte %01111100
-    .byte %00111100
-; 3 Sureste
-    .byte %00111100
-    .byte %01111100
-    .byte %11111000
-    .byte %11111000
-    .byte %01111100
-    .byte %00111110
-    .byte %00001111
-    .byte %00000111
-; 4 Sur
-    .byte %01100110
-    .byte %01111110
-    .byte %11111111
-    .byte %11011011
-    .byte %11011011
-    .byte %11111111
-    .byte %00111100
-    .byte %00011000
-; 5 Suroeste
-    .byte %00111100
-    .byte %00111110
-    .byte %00011111
-    .byte %00011111
-    .byte %00111110
-    .byte %01111100
-    .byte %11110000
-    .byte %11100000
-; 6 Oeste
-    .byte %00111100
-    .byte %00111110
-    .byte %01111111
-    .byte %11111111
-    .byte %11111111
-    .byte %01111111
-    .byte %00111110
-    .byte %00111100
-; 7 Noroeste
-    .byte %11100000
-    .byte %11110000
-    .byte %01111100
-    .byte %00111110
-    .byte %00011111
-    .byte %00011111
-    .byte %00111110
-    .byte %00111100
+; North
+    .byte %00000000,%01100110,%01100110,%01111110
+    .byte %01111110,%01100110,%01100110,%00000000
+; NE
+    .byte %00000000,%00001110,%00111110,%01111100
+    .byte %01111100,%01111000,%01110000,%00000000
+; East
+    .byte %00000000,%01111110,%00011000,%01111110
+    .byte %01111110,%00011000,%01111110,%00000000
+; SE
+    .byte %00000000,%01110000,%01111000,%01111100
+    .byte %01111100,%00111110,%00001110,%00000000
+; South
+    .byte %00000000,%01100110,%01100110,%01111110
+    .byte %01111110,%01100110,%01100110,%00000000
+; SW
+    .byte %00000000,%00001110,%00011110,%00111110
+    .byte %00111110,%01111100,%01110000,%00000000
+; West
+    .byte %00000000,%01111110,%00011000,%01111110
+    .byte %01111110,%00011000,%01111110,%00000000
+; NW
+    .byte %00000000,%01110000,%01111100,%00111110
+    .byte %00111110,%00011110,%00001110,%00000000
+
+TurretSprites:
+; North
+    .byte %00011000,%00011000,%00011000,%00111100
+    .byte %00111100,%00011000,%00000000,%00000000
+; NE
+    .byte %00000011,%00000110,%00001100,%00111100
+    .byte %00111100,%00011000,%00000000,%00000000
+; East
+    .byte %00000000,%00000000,%00000000,%00111111
+    .byte %00111111,%00000000,%00000000,%00000000
+; SE
+    .byte %00000000,%00000000,%00011000,%00111100
+    .byte %00111100,%00001100,%00000110,%00000011
+; South
+    .byte %00000000,%00000000,%00011000,%00111100
+    .byte %00111100,%00011000,%00011000,%00011000
+; SW
+    .byte %00000000,%00000000,%00011000,%00111100
+    .byte %00111100,%00110000,%01100000,%11000000
+; West
+    .byte %00000000,%00000000,%00000000,%11111100
+    .byte %11111100,%00000000,%00000000,%00000000
+; NW
+    .byte %11000000,%01100000,%00110000,%00111100
+    .byte %00111100,%00011000,%00000000,%00000000
 
     org $FFFC
     .word Reset
