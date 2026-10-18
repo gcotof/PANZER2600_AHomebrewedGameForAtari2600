@@ -1,3 +1,7 @@
+; Milestone 2.4.2: kernel con rutas acotadas.
+; Invariante: BulletY y TargetY = 192 cuando no se dibujan.
+; En el peor caso (bala + tanque + blanco): ~73 ciclos antes de WSYNC.
+; Es importante mantener el orden y NO anadir trabajo a Visible.
 Visible:
     lda TankByte
     sta GRP0
@@ -6,11 +10,10 @@ Visible:
     lda TargetByte
     sta GRP1
 
-    inx                    ; calcular datos de la fila siguiente
+    inx                    ; datos de la proxima scanline
 
+    ; Sin rama BulletActive: BulletY=192 cuando la bala no existe.
     ldy #0
-    lda BulletActive
-    beq NoBulletRow
     txa
     sec
     sbc BulletY
@@ -33,8 +36,7 @@ NoTankRow:
 StoreTank:
     sta TankByte
 
-    lda TargetRespawn
-    bne NoTargetRow
+    ; Sin rama TargetRespawn: TargetY=192 mientras esta oculto.
     txa
     sec
     sbc TargetY
@@ -63,4 +65,3 @@ Overscan:
     dex
     bne Overscan
     jmp Frame
-

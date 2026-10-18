@@ -23,6 +23,9 @@ ClearRAM:
     sta BulletActive
     sta FireLatch
     sta BulletDelay
+    lda #192
+    sta BulletY
+    lda #0
     sta GRP0
     sta ENAM0
     sta GRP1

@@ -31,5 +31,7 @@ BulletDone:
 KillBullet:
     lda #0
     sta BulletActive
+    lda #192
+    sta BulletY
     rts
 

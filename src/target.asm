@@ -9,8 +9,12 @@ UpdateTarget:
     beq TargetNoHit
     lda #0
     sta BulletActive
+    lda #192
+    sta BulletY
     lda #TARGET_RESPAWN_FRAMES
     sta TargetRespawn
+    lda #192
+    sta TargetY
     inc TargetHits
 TargetNoHit:
     lda #0
