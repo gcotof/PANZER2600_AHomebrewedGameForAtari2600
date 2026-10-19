@@ -3,29 +3,44 @@
 UpdateBullet:
     lda BulletActive
     beq BulletDone
-    lda BulletDelay
-    beq BulletReady
-    dec BulletDelay
-    rts
-BulletReady:
-    lda #2
-    sta BulletDelay
+    lda BulletX
+    sta PrevX
+    lda BulletY
+    sta PrevY
+    lda BulletDX
+    beq BulletYStep
+    bmi BulletXNeg
     lda BulletX
     clc
-    adc BulletDX
-    ; Salvaguarda contra wrap (0 -> 255). Las barreras laterales las maneja
-    ; UpdateWall con BULLET_MIN_X / BULLET_MAX_X; esta guarda solo debe
-    ; quedar por encima de BULLET_MAX_X (172) para no matar la bala antes.
+    adc #BULLET_SPEED
+    jmp BulletXStore
+BulletXNeg:
+    lda BulletX
+    sec
+    sbc #BULLET_SPEED
+BulletXStore:
+    ; Wrap (0 -> 252) queda por encima de 200 y mata la bala; las barreras
+    ; laterales las maneja UpdateWall con BULLET_MIN_X / BULLET_MAX_X.
     cmp #200
     bcs KillBullet
     sta BulletX
+BulletYStep:
+    lda BulletDY
+    beq BulletDone
+    bmi BulletYNeg
     lda BulletY
     clc
-    adc BulletDY
-    cmp #4
-    bcc KillBullet
-    cmp #188
-    bcs KillBullet
+    adc #BULLET_SPEED
+    jmp BulletYStore
+BulletYNeg:
+    lda BulletY
+    sec
+    sbc #BULLET_SPEED
+BulletYStore:
+    cmp #BULLET_MIN_Y
+    bcc BounceY
+    cmp #BULLET_MAX_Y
+    bcs BounceY
     sta BulletY
 BulletDone:
     rts
@@ -36,3 +51,20 @@ KillBullet:
     sta BulletY
     rts
 
+; Rebote contra techo/suelo: invierte DY y deja la bala en su posicion anterior.
+; Con BulletBounce = 0 la bala muere (comportamiento sin rebotes).
+BounceY:
+    lda BulletBounce
+    beq KillBullet
+    dec BulletBounce
+    lda BulletDY
+    eor #$FF
+    clc
+    adc #1
+    sta BulletDY
+RestorePos:
+    lda PrevX
+    sta BulletX
+    lda PrevY
+    sta BulletY
+    rts

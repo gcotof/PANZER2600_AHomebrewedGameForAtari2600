@@ -1,4 +1,4 @@
-; ARMOR DUEL 2600 - Milestone 2.5A.1: charged shot + recoil
+; ARMOR DUEL 2600 - Milestone 2.5C: muros 4 lados, kernel de 2 lineas, bala gris, frenado al cargar
 ; Joystick: up/down drive, left/right hull, fire+left/right turret.
 ; Hold fire (without turning the turret) for FIRE_HOLD frames to shoot.
 ; Rotating the turret resets the charge. The tank brightens while charging.
@@ -21,6 +21,7 @@
     include "src/projectile2.asm"
     include "src/hits.asm"
     include "src/slots.asm"
+    include "src/round.asm"
     include "src/recoil.asm"
     include "src/bullet.asm"
     include "src/target.asm"

@@ -12,7 +12,7 @@ ClearRAM:
 
     lda #56
     sta TankX
-    lda #88
+    lda #START_Y
     sta TankY
     lda #0
     sta Facing
@@ -30,6 +30,7 @@ ClearRAM:
     lda #0
     sta GRP0
     sta ENAM0
+    sta ENABL
     sta GRP1
     sta NUSIZ1
     sta TargetRespawn
@@ -45,7 +46,7 @@ ClearRAM:
     sta COLUPF
     lda #120
     sta Tank2X
-    lda #88
+    lda #START_Y
     sta Tank2Y
     lda #6
     sta Facing2

@@ -3,10 +3,6 @@ HandleFire2:
     bmi Fire2Released
     lda Fire2Latch
     bne Fire2Done
-    lda SWCHA
-    and #$0C
-    cmp #$0C
-    bne Charge2Reset
     lda Fire2Charge
     cmp #FIRE_HOLD
     bcs Charge2Full
@@ -32,6 +28,8 @@ Charge2Full:
     sta Recoil2DY
     lda #RECOIL_LEN
     sta Recoil2Frames
+    lda #LOCK_FRAMES
+    sta Lock2Frames
     lda #FLASH_LEN
     sta FlashFrames
     lda Tank2X
@@ -50,6 +48,8 @@ Charge2Full:
     lda #1
     sta BulletActive
     sta BulletOwner
+    lda #BOUNCES
+    sta BulletBounce
     lda #0
     sta BulletDelay
 Fire2Done:
@@ -72,6 +72,10 @@ UpdateRecoil2:
     sta StepX
     lda Recoil2DY
     sta StepY
+    jsr ApplyStep2
+    lda Recoil2Frames
+    cmp #RECOIL_FAST-1
+    bcc Recoil2Done
     jsr ApplyStep2
 Recoil2Done:
     rts

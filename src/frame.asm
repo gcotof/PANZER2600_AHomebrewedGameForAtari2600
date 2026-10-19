@@ -10,6 +10,13 @@ Frame:
     lda #43
     sta TIM64T
 
+    lda PauseFrames
+    beq PlayFrame
+    dec PauseFrames
+    bne FrameLogicDone
+    jsr EndPause
+    jmp FrameLogicDone
+PlayFrame:
     jsr Controls
     jsr Controls2
     jsr LoadSlot1
@@ -27,6 +34,8 @@ Frame:
     jsr UpdateRecoil
     jsr UpdateRecoil2
     jsr PickDraw
+FrameLogicDone:
+    jsr PrepHud
 
     ; Color del tanque: se aclara mientras se carga el disparo.
     lda FireCharge
@@ -39,6 +48,16 @@ Frame:
     adc #6
     ora #$80               ; $86 en reposo, hasta $8B cargado
     sta COLUP0
+    ; Color del tanque 2: verde que se aclara igual ($C6..$CB).
+    lda Fire2Charge
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    clc
+    adc #$C6
+    sta COLUP1
 
     ; Destello del fondo al disparar.
     lda #BG_COLOR
@@ -47,6 +66,16 @@ Frame:
     dec FlashFrames
     lda #FLASH_COLOR
 SetBackground:
+    ldx Winner
+    beq BgStore
+    lda PauseFrames
+    and #8
+    bne BgWinner
+    lda #BG_COLOR
+    jmp BgStore
+BgWinner:
+    lda WinnerColors-1,x   ; x = Winner (1 o 2)
+BgStore:
     sta COLUBK
 
     lda Facing
@@ -120,16 +149,22 @@ Compose2Loop:
     jsr SetHorizPos
 
     lda #0
-    sta HMM0               ; sin movimiento fino si no hay bala
+    sta HMBL               ; sin movimiento fino si no hay bala
     lda BulletActive
     beq ApplyMotion
     lda BulletX
-    ldx #2                 ; 2 = missile 0
+    ldx #4                 ; 4 = ball (la bala)
     jsr SetHorizPos
 ApplyMotion:
     sta WSYNC
     sta HMOVE
 
+    ; Muro superior: PF completo hasta que el kernel lo cambie.
+    lda #$F0
+    sta PF0
+    lda #$FF
+    sta PF1
+    sta PF2
 WaitBlank:
     lda INTIM
     bne WaitBlank          ; al salir A = 0

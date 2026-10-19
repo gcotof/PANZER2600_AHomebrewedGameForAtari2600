@@ -4,6 +4,9 @@ ReadDrive:
     dec DriveDelay
     rts
 DriveReady:
+    lda FireCharge
+    cmp #STOP_AT
+    bcs DriveDone                ; ultimos 0.5 s de carga: tanque quieto
     lda SWCHA
     and #$10
     bne CheckReverse
@@ -33,7 +36,13 @@ CheckReverse:
 DriveDone:
     rts
 MoveSlow:
-    lda #2
+    lda FireCharge
+    lsr
+    lsr
+    lsr
+    lsr                    ; 0..9 segun la carga
+    clc
+    adc #2                 ; mas carga = mas frames entre pasos
     sta DriveDelay
     lda StepX
     beq MoveNow
@@ -71,9 +80,9 @@ SkipX:
     lda TankY
     clc
     adc StepY
-    cmp #8
+    cmp #TANK_MIN_Y
     bcc SkipY
-    cmp #185
+    cmp #TANK_MAX_Y
     bcs SkipY
     sta TestY
     lda TankX

@@ -6,10 +6,6 @@ HandleFire:
     bmi FireReleased
     lda FireLatch
     bne FireDone           ; ya disparo en esta pulsacion
-    lda SWCHA
-    and #$C0
-    cmp #$C0
-    bne ChargeReset        ; girando la torreta: reinicia la carga
     lda FireCharge
     cmp #FIRE_HOLD
     bcs ChargeFull
@@ -36,6 +32,8 @@ ChargeFull:
     sta RecoilDY
     lda #RECOIL_LEN
     sta RecoilFrames
+    lda #LOCK_FRAMES
+    sta Lock1Frames
     lda #FLASH_LEN
     sta FlashFrames
     ; Spawn approximately at the center of the 8x8 sprite.
@@ -56,6 +54,8 @@ ChargeFull:
     sta BulletActive
     lda #0
     sta BulletOwner
+    lda #BOUNCES
+    sta BulletBounce
     lda #0
     sta BulletDelay
 FireDone:

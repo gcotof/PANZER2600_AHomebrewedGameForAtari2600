@@ -1,4 +1,9 @@
 Controls:
+    lda Lock1Frames
+    beq ControlsFree
+    dec Lock1Frames
+    rts                    ; tanque sacudido por el disparo: sin control
+ControlsFree:
     lda TurnDelay
     beq ReadTurn
     dec TurnDelay

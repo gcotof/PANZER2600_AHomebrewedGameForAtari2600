@@ -15,6 +15,8 @@ LoadSlot1:
     sta BulletActive
     lda S1Del
     sta BulletDelay
+    lda S1Bnc
+    sta BulletBounce
     lda #0
     sta BulletOwner
     rts
@@ -31,6 +33,8 @@ SaveSlot1:
     sta S1Act
     lda BulletDelay
     sta S1Del
+    lda BulletBounce
+    sta S1Bnc
     rts
 LoadSlot2:
     lda S2X
@@ -45,6 +49,8 @@ LoadSlot2:
     sta BulletActive
     lda S2Del
     sta BulletDelay
+    lda S2Bnc
+    sta BulletBounce
     lda #1
     sta BulletOwner
     rts
@@ -61,6 +67,8 @@ SaveSlot2:
     sta S2Act
     lda BulletDelay
     sta S2Del
+    lda BulletBounce
+    sta S2Bnc
     rts
 
 ; Deja en Bullet* la bala que se dibujara este frame.

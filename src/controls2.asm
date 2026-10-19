@@ -1,4 +1,9 @@
 Controls2:
+    lda Lock2Frames
+    beq Controls2Free
+    dec Lock2Frames
+    rts
+Controls2Free:
     lda Turn2Delay
     beq ReadTurn2
     dec Turn2Delay
@@ -52,6 +57,9 @@ ReadDrive2:
     dec Drive2Delay
     rts
 Drive2Ready:
+    lda Fire2Charge
+    cmp #STOP_AT
+    bcs Drive2Done                ; ultimos 0.5 s de carga: tanque quieto
     lda SWCHA
     and #$01
     bne CheckReverse2
@@ -80,7 +88,13 @@ CheckReverse2:
 Drive2Done:
     rts
 MoveSlow2:
-    lda #2
+    lda Fire2Charge
+    lsr
+    lsr
+    lsr
+    lsr                    ; 0..9 segun la carga
+    clc
+    adc #2                 ; mas carga = mas frames entre pasos
     sta Drive2Delay
     lda StepX
     beq MoveNow2
@@ -116,9 +130,9 @@ Skip2X:
     lda Tank2Y
     clc
     adc StepY
-    cmp #8
+    cmp #TANK_MIN_Y
     bcc Skip2Y
-    cmp #185
+    cmp #TANK_MAX_Y
     bcs Skip2Y
     sta TestY
     lda Tank2X

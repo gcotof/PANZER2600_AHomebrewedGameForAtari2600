@@ -9,6 +9,10 @@ UpdateRecoil:
     lda RecoilDY
     sta StepY
     jsr ApplyStep
+    lda RecoilFrames
+    cmp #RECOIL_FAST-1
+    bcc RecoilDone
+    jsr ApplyStep          ; 2 px/frame al inicio
 RecoilDone:
     rts
 
