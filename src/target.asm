@@ -32,7 +32,7 @@ TargetNoHit:
     sta TargetY
     rts
 TargetPositionA:
-    lda #112
+    lda #64
     sta TargetX
     lda #64
     sta TargetY

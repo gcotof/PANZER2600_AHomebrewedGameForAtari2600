@@ -10,7 +10,7 @@ ClearRAM:
     pha
     bne ClearRAM
 
-    lda #76
+    lda #56
     sta TankX
     lda #88
     sta TankY
@@ -33,7 +33,15 @@ ClearRAM:
     sta TargetRespawn
     sta TargetHits
     sta NUSIZ0             ; single player, missile width 1
-    lda #112
+    sta PF1
+    sta PF2
+    lda #PF_MIRROR         ; CTRLPF bit0=1: la mitad derecha del playfield es un espejo
+    sta CTRLPF
+    lda #WALL_PF0
+    sta PF0
+    lda #WALL_COLOR
+    sta COLUPF
+    lda #64
     sta TargetX
     lda #64
     sta TargetY

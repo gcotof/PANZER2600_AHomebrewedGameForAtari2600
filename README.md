@@ -67,3 +67,10 @@ DASM, usa `make DASM=/ruta/a/dasm`.
 - `make compare` ahora **no** debe coincidir: la ROM contiene nuevas mecánicas.
 
 **Nota:** este milestone no se ha compilado ni ejecutado en Stella en este entorno. En particular, revisa el numero de scanlines del kernel con el debugger de Stella: se agrego logica por linea para dibujar P1 y puede requerir optimizacion si aparecen lineas inestables.
+
+## Milestone 2.5A.4 - Barreras
+Limites de tanque y bala corregidos con coordenadas medidas en Stella.
+Ver `MILESTONE_2_5.md` y `include/constants.inc`.
+
+## Milestone 2.5B.1 - Arena a pantalla completa
+Playfield espejado (`CTRLPF=1`). Ver `MILESTONE_2_5B1.md`.

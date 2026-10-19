@@ -33,3 +33,5 @@ TargetY = $A4
 TargetByte = $A5
 TargetRespawn = $A6
 TargetHits = $A7
+TestX = $A8
+TestY = $A9

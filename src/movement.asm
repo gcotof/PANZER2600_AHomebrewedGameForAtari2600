@@ -56,10 +56,16 @@ ApplyStep:
     lda TankX
     clc
     adc StepX
-    cmp #8
+    cmp #TANK_MIN_X
     bcc SkipX
-    cmp #151
+    cmp #TANK_MAX_X
     bcs SkipX
+    sta TestX
+    lda TankY
+    sta TestY
+    jsr TankHitsWall
+    bcs SkipX
+    lda TestX
     sta TankX
 SkipX:
     lda TankY
@@ -69,7 +75,30 @@ SkipX:
     bcc SkipY
     cmp #185
     bcs SkipY
+    sta TestY
+    lda TankX
+    sta TestX
+    jsr TankHitsWall
+    bcs SkipY
+    lda TestY
     sta TankY
 SkipY:
     rts
 
+; Entrada: TestX, TestY. Salida: C=1 si el tanque chocaria con el pilar.
+TankHitsWall:
+    lda TestX
+    cmp #CWALL_TANK_X_LO
+    bcc NoWallHit
+    cmp #CWALL_TANK_X_HI
+    bcs NoWallHit
+    lda TestY
+    cmp #CWALL_TANK_Y_LO
+    bcc NoWallHit
+    cmp #CWALL_TANK_Y_HI
+    bcs NoWallHit
+    sec
+    rts
+NoWallHit:
+    clc
+    rts

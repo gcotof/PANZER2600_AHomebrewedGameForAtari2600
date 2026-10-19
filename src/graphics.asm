@@ -1,8 +1,8 @@
-; Milestone 2.4.2: kernel con rutas acotadas.
-; Invariante: BulletY y TargetY = 192 cuando no se dibujan.
-; En el peor caso (bala + tanque + blanco): ~73 ciclos antes de WSYNC.
-; Es importante mantener el orden y NO anadir trabajo a Visible.
-Visible:
+; Milestone 2.5B: kernel en 3 tramos (arriba / pilar / abajo).
+; El cuerpo es identico al 2.4.2; solo cambia el valor de salida del bucle.
+; PF2 se escribe justo despues del WSYNC de la transicion (+5 ciclos en 1 linea).
+    MAC KERNEL_LINES
+.Visible:
     lda TankByte
     sta GRP0
     lda MissileVal
@@ -10,48 +10,55 @@ Visible:
     lda TargetByte
     sta GRP1
 
-    inx                    ; datos de la proxima scanline
+    inx
 
-    ; Sin rama BulletActive: BulletY=192 cuando la bala no existe.
     ldy #0
     txa
     sec
     sbc BulletY
     cmp #2
-    bcs NoBulletRow
+    bcs .NoBulletRow
     ldy #2
-NoBulletRow:
+.NoBulletRow:
     sty MissileVal
 
     txa
     sec
     sbc TankY
     cmp #8
-    bcs NoTankRow
+    bcs .NoTankRow
     tay
     lda CompositeRows,y
-    jmp StoreTank
-NoTankRow:
+    jmp .StoreTank
+.NoTankRow:
     lda #0
-StoreTank:
+.StoreTank:
     sta TankByte
 
-    ; Sin rama TargetRespawn: TargetY=192 mientras esta oculto.
     txa
     sec
     sbc TargetY
     cmp #8
-    bcs NoTargetRow
+    bcs .NoTargetRow
     lda #$FF
-    bne StoreTarget
-NoTargetRow:
+    bne .StoreTarget
+.NoTargetRow:
     lda #0
-StoreTarget:
+.StoreTarget:
     sta TargetByte
 
-    cpx #192
+    cpx #{1}
     sta WSYNC
-    bne Visible
+    bne .Visible
+    ENDM
+
+    KERNEL_LINES CWALL_Y0
+    lda #CWALL_PF2
+    sta PF2
+    KERNEL_LINES CWALL_Y1
+    lda #0
+    sta PF2
+    KERNEL_LINES 192
 
     lda #0
     sta GRP0

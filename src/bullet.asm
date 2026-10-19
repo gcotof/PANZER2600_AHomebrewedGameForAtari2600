@@ -13,9 +13,10 @@ BulletReady:
     lda BulletX
     clc
     adc BulletDX
-    cmp #4
-    bcc KillBullet
-    cmp #156
+    ; Salvaguarda contra wrap (0 -> 255). Las barreras laterales las maneja
+    ; UpdateWall con BULLET_MIN_X / BULLET_MAX_X; esta guarda solo debe
+    ; quedar por encima de BULLET_MAX_X (172) para no matar la bala antes.
+    cmp #200
     bcs KillBullet
     sta BulletX
     lda BulletY

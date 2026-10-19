@@ -14,6 +14,7 @@ Frame:
     jsr HandleFire
     jsr UpdateRecoil
     jsr UpdateBullet
+    jsr UpdateWall
     jsr UpdateTarget
 
     ; Color del tanque: se aclara mientras se carga el disparo.
