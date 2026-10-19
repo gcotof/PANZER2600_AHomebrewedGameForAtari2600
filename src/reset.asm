@@ -25,6 +25,8 @@ ClearRAM:
     sta BulletDelay
     lda #192
     sta BulletY
+    sta S1Y
+    sta S2Y
     lda #0
     sta GRP0
     sta ENAM0
@@ -41,11 +43,14 @@ ClearRAM:
     sta PF0
     lda #WALL_COLOR
     sta COLUPF
-    lda #64
-    sta TargetX
-    lda #64
-    sta TargetY
-    lda #TARGET_COLOR
+    lda #120
+    sta Tank2X
+    lda #88
+    sta Tank2Y
+    lda #6
+    sta Facing2
+    sta Turret2Facing
+    lda #TANK2_COLOR
     sta COLUP1
     lda #$86
     sta COLUP0

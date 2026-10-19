@@ -84,8 +84,6 @@ SkipX:
     sta TankY
 SkipY:
     rts
-
-; Entrada: TestX, TestY. Salida: C=1 si el tanque chocaria con el pilar.
 TankHitsWall:
     lda TestX
     cmp #CWALL_TANK_X_LO

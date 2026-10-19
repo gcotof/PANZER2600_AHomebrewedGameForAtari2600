@@ -11,11 +11,22 @@ Frame:
     sta TIM64T
 
     jsr Controls
+    jsr Controls2
+    jsr LoadSlot1
     jsr HandleFire
-    jsr UpdateRecoil
     jsr UpdateBullet
     jsr UpdateWall
-    jsr UpdateTarget
+    jsr UpdateHits
+    jsr SaveSlot1
+    jsr LoadSlot2
+    jsr HandleFire2
+    jsr UpdateBullet
+    jsr UpdateWall
+    jsr UpdateHits
+    jsr SaveSlot2
+    jsr UpdateRecoil
+    jsr UpdateRecoil2
+    jsr PickDraw
 
     ; Color del tanque: se aclara mientras se carga el disparo.
     lda FireCharge
@@ -67,6 +78,33 @@ ComposeLoop:
     sta CompositeRows,x
     dex
     bpl ComposeLoop
+    lda Facing2
+    asl
+    asl
+    asl
+    sta SpriteBase
+    lda Turret2Facing
+    asl
+    asl
+    asl
+    sta TurretBase
+    ldx #7
+Compose2Loop:
+    txa
+    clc
+    adc SpriteBase
+    tay
+    lda TankSprites,y
+    sta HullRow
+    txa
+    clc
+    adc TurretBase
+    tay
+    lda TurretSprites,y
+    ora HullRow
+    sta Tank2Rows,x
+    dex
+    bpl Compose2Loop
 
     ; --- Posicionamiento horizontal ---
     ; Primero se fijan las posiciones gruesas (RESxx) y los ajustes finos
@@ -77,7 +115,7 @@ ComposeLoop:
     ldx #0                 ; 0 = player 0
     jsr SetHorizPos
 
-    lda TargetX
+    lda Tank2X
     ldx #1
     jsr SetHorizPos
 

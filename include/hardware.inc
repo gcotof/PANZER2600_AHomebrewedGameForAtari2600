@@ -28,4 +28,4 @@ CXM0FB  = $01
 SWCHA   = $0280
 INTIM   = $0284
 TIM64T  = $0296
-
+INPT5   = $0D

@@ -34,22 +34,18 @@ TANK_MAX_X      = WALL_RIGHT_EDGE + P0_OFFSET - SPRITE_W + 1  ; 164 (exclusivo; 
 ; Limites de la bala (origen X): muere al tocar la barrera.
 BULLET_MIN_X    = WALL_LEFT_EDGE + M0_OFFSET    ; 20: por debajo toca x<=3
 BULLET_MAX_X    = WALL_RIGHT_EDGE + M0_OFFSET   ; 172: desde aqui toca x>=156
+TANK2_COLOR = $C8
 
-; --- Pilar central (2.5B): pantalla x=72..87, filas 80..111 ---
-CWALL_PF2   = $C0        ; PF2 + espejo = 16 px de ancho
+CWALL_PF2   = $C0
 CWALL_X0    = 72
-CWALL_X1    = 88         ; exclusivo
+CWALL_X1    = 88
 CWALL_Y0    = 80
-CWALL_Y1    = 112        ; exclusivo
-
-; Tanque (origen X): bloqueado si LO <= X < HI, LO <= Y < HI
-CWALL_TANK_X_LO = CWALL_X0 + P0_OFFSET - SPRITE_W + 1   ; 80
-CWALL_TANK_X_HI = CWALL_X1 + P0_OFFSET                  ; 103
-CWALL_TANK_Y_LO = CWALL_Y0 - SPRITE_W + 1               ; 73
-CWALL_TANK_Y_HI = CWALL_Y1                              ; 112
-
-; Bala (origen X, 1 px; 2 filas de alto)
-CWALL_BUL_X_LO  = CWALL_X0 + M0_OFFSET                  ; 88
-CWALL_BUL_X_HI  = CWALL_X1 + M0_OFFSET                  ; 104
-CWALL_BUL_Y_LO  = CWALL_Y0 - 1                          ; 79
+CWALL_Y1    = 112
+CWALL_TANK_X_LO = CWALL_X0 + P0_OFFSET - SPRITE_W + 1
+CWALL_TANK_X_HI = CWALL_X1 + P0_OFFSET
+CWALL_TANK_Y_LO = CWALL_Y0 - SPRITE_W + 1
+CWALL_TANK_Y_HI = CWALL_Y1
+CWALL_BUL_X_LO  = CWALL_X0 + M0_OFFSET
+CWALL_BUL_X_HI  = CWALL_X1 + M0_OFFSET
+CWALL_BUL_Y_LO  = CWALL_Y0 - 1
 CWALL_BUL_Y_HI  = CWALL_Y1

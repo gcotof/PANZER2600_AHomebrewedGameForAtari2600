@@ -55,6 +55,8 @@ ChargeFull:
     lda #1
     sta BulletActive
     lda #0
+    sta BulletOwner
+    lda #0
     sta BulletDelay
 FireDone:
     rts

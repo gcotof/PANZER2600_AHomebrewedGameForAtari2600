@@ -1,6 +1,3 @@
-; Milestone 2.5B: kernel en 3 tramos (arriba / pilar / abajo).
-; El cuerpo es identico al 2.4.2; solo cambia el valor de salida del bucle.
-; PF2 se escribe justo despues del WSYNC de la transicion (+5 ciclos en 1 linea).
     MAC KERNEL_LINES
 .Visible:
     lda TankByte
@@ -26,25 +23,26 @@
     sec
     sbc TankY
     cmp #8
-    bcs .NoTankRow
+    bcc .InTank
+    lda #0
+    beq .StoreTank
+.InTank:
     tay
     lda CompositeRows,y
-    jmp .StoreTank
-.NoTankRow:
-    lda #0
 .StoreTank:
     sta TankByte
 
     txa
     sec
-    sbc TargetY
+    sbc Tank2Y
     cmp #8
-    bcs .NoTargetRow
-    lda #$FF
-    bne .StoreTarget
-.NoTargetRow:
+    bcc .InTank2
     lda #0
-.StoreTarget:
+    beq .StoreTank2
+.InTank2:
+    tay
+    lda Tank2Rows,y
+.StoreTank2:
     sta TargetByte
 
     cpx #{1}

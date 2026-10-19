@@ -1,8 +1,6 @@
-; Colision de la bala: pilar central + barreras laterales.
 UpdateWall:
     lda BulletActive
     beq WallDone
-    ; --- pilar central ---
     lda BulletX
     cmp #CWALL_BUL_X_LO
     bcc SideWalls
