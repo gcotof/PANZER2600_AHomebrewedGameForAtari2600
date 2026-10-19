@@ -110,6 +110,12 @@
     KERNEL_LINES ArenaY0
     lda ArenaPF2
     sta PF2
+    KERNEL_LINES #STREET_Y0
+    lda #0                  ; callejon horizontal entre edificios
+    sta PF2
+    KERNEL_LINES #STREET_Y1
+    lda ArenaPF2
+    sta PF2
     KERNEL_LINES ArenaY1
     lda #0
     sta PF2

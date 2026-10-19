@@ -72,6 +72,7 @@ StartRound:
     sta BulletActive
     lda #6
     sta Facing2
+    lda #12
     sta Turret2Facing
     lda #192
     sta S1Y

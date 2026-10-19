@@ -22,7 +22,7 @@ Turn2Left:
     lda Turret2Facing
     sec
     sbc #1
-    and #7
+    and #15
     sta Turret2Facing
     jmp Turn2Finished
 Turn2HullLeft:
@@ -38,7 +38,7 @@ Turn2Right:
     lda Turret2Facing
     clc
     adc #1
-    and #7
+    and #15
     sta Turret2Facing
     jmp Turn2Finished
 Turn2HullRight:
@@ -64,9 +64,9 @@ Drive2Ready:
     and #$01
     bne CheckReverse2
     ldx Facing2
-    lda DeltaX,x
+    lda HullDeltaX,x
     sta StepX
-    lda DeltaY,x
+    lda HullDeltaY,x
     sta StepY
     jmp MoveSlow2
 CheckReverse2:
@@ -74,12 +74,12 @@ CheckReverse2:
     and #$02
     bne Drive2Done
     ldx Facing2
-    lda DeltaX,x
+    lda HullDeltaX,x
     eor #$FF
     clc
     adc #1
     sta StepX
-    lda DeltaY,x
+    lda HullDeltaY,x
     eor #$FF
     clc
     adc #1

@@ -10,17 +10,20 @@ UpdateBullet:
     lda BulletDX
     beq BulletYStep
     bmi BulletXNeg
-    lda BulletX
+    asl                         ; magnitud 1 -> 2px, 2 -> 4px
     clc
-    adc #BULLET_SPEED
+    adc BulletX
     jmp BulletXStore
 BulletXNeg:
+    eor #$FF
+    clc
+    adc #1
+    asl
+    sta BulletDelay
     lda BulletX
     sec
-    sbc #BULLET_SPEED
+    sbc BulletDelay
 BulletXStore:
-    ; Wrap (0 -> 252) queda por encima de 200 y mata la bala; las barreras
-    ; laterales las maneja UpdateWall con BULLET_MIN_X / BULLET_MAX_X.
     cmp #200
     bcs KillBullet
     sta BulletX
@@ -28,14 +31,19 @@ BulletYStep:
     lda BulletDY
     beq BulletDone
     bmi BulletYNeg
-    lda BulletY
+    asl
     clc
-    adc #BULLET_SPEED
+    adc BulletY
     jmp BulletYStore
 BulletYNeg:
+    eor #$FF
+    clc
+    adc #1
+    asl
+    sta BulletDelay
     lda BulletY
     sec
-    sbc #BULLET_SPEED
+    sbc BulletDelay
 BulletYStore:
     cmp #BULLET_MIN_Y
     bcc BounceY

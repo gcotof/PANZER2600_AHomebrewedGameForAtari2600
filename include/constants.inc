@@ -45,6 +45,9 @@ TANK2_COLOR = $C8
 ; Se dibuja con PF2 (4 px por bit: bit k = x 48+4k). Ver ArenaTable en src/arena.asm.
 ; Las arenas son simetricas izquierda/derecha y centradas en vertical (Y0+Y1 = 96).
 ARENA_COUNT     = 3
+; Dos edificios separados por un callejon horizontal, compartido por las 3 arenas.
+STREET_Y0       = 42
+STREET_Y1       = 54
 SEL_START_WAIT  = 40     ; frames sin leer botones al entrar a la seleccion (evita confirmar sin querer)
 SEL_REPEAT      = 15     ; frames entre cambios de voto al mantener el joystick
 SEL_REVEAL      = 60     ; frames mostrando la arena elegida antes de la primera ronda

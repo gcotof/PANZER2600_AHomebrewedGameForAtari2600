@@ -1,17 +1,10 @@
 ; Milestone 2.8 - Competitive Arena System
 ;  2.8.1 LoadArena: carga una arena de ArenaTable a RAM (kernel y colisiones la leen de ahi)
-;  2.8.2 ArenaTable: 3 arenas simetricas
-;  2.8.3 votacion independiente (J1: SWCHA alto, J2: SWCHA bajo; boton = confirmar)
-;  2.8.4 unanimidad o desempate 50/50 (paridad de un contador de frames, tomado al confirmar el 2o)
-;  2.8.5 pantalla de seleccion: el muro/obstaculo muestra la arena votada y los
-;        pips del marcador muestran el numero de arena de cada jugador
-;        (parpadean = sin confirmar, fijos = confirmado)
-
-; Formato (5 bytes): X0, X1, Y0, Y1, PF2.  Mitad izquierda [X0,X1) y espejo [160-X1,160-X0).
+;  2.8.2 ArenaTable:
 ArenaTable:
-    .byte 72,80,32,64,$C0    ; 0: pilar central (la arena original)
-    .byte 56,72,28,68,$3C    ; 1: dos bloques anchos
-    .byte 60,68,20,76,$18    ; 2: dos muros altos con pasillos arriba y abajo
+    .byte 48,76,19,76,$FF    ; BLOCKADE: estructuras anchas, pasaje central
+    .byte 60,72,10,86,$1C    ; DEPOT: columnas estrechas, recorrido largo
+    .byte 48,64,26,70,$0F    ; CROSSROADS: bloques separados, espacios laterales
 
 ; Entrada: A = indice de arena. Usa TestX/TestY como temporales.
 LoadArena:

@@ -41,9 +41,9 @@ Charge2Full:
     adc #4
     sta BulletY
     ldx Turret2Facing
-    lda DeltaX,x
+    lda BulletVecX,x
     sta BulletDX
-    lda DeltaY,x
+    lda BulletVecY,x
     sta BulletDY
     lda #1
     sta BulletActive

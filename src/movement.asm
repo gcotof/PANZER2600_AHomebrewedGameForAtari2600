@@ -11,9 +11,9 @@ DriveReady:
     and #$10
     bne CheckReverse
     ldx Facing
-    lda DeltaX,x
+    lda HullDeltaX,x
     sta StepX
-    lda DeltaY,x
+    lda HullDeltaY,x
     sta StepY
     jsr MoveSlow
     rts
@@ -22,12 +22,12 @@ CheckReverse:
     and #$20
     bne DriveDone
     ldx Facing
-    lda DeltaX,x
+    lda HullDeltaX,x
     eor #$FF
     clc
     adc #1
     sta StepX
-    lda DeltaY,x
+    lda HullDeltaY,x
     eor #$FF
     clc
     adc #1
@@ -94,6 +94,15 @@ SkipX:
 SkipY:
     rts
 TankHitsWall:
+    ; Callejon libre solo si el sprite completo (8 filas) cabe dentro.
+    lda TestY
+    cmp #STREET_Y0
+    bcc TankStreetNotClear
+    cmp #STREET_Y1-7
+    bcs TankStreetNotClear
+    clc
+    rts
+TankStreetNotClear:
     lda TestY
     clc
     adc #7                  ; TestY >= Y0-7 (el sprite mide 8 filas)

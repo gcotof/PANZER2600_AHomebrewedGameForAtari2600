@@ -46,9 +46,9 @@ ChargeFull:
     adc #4
     sta BulletY
     ldx TurretFacing
-    lda DeltaX,x
+    lda BulletVecX,x
     sta BulletDX
-    lda DeltaY,x
+    lda BulletVecY,x
     sta BulletDY
     lda #1
     sta BulletActive

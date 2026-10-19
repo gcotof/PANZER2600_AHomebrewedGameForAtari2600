@@ -22,7 +22,7 @@ TurnLeft:
     lda TurretFacing
     sec
     sbc #1
-    and #7
+    and #15
     sta TurretFacing
     jmp TurnFinished
 TurnHullLeft:
@@ -38,7 +38,7 @@ TurnRight:
     lda TurretFacing
     clc
     adc #1
-    and #7
+    and #15
     sta TurretFacing
     jmp TurnFinished
 TurnHullRight:

@@ -94,6 +94,15 @@ PillarNoY:
 ; Entrada: TestX, TestY (origen de la bala). Salida: C=1 si esta dentro de un obstaculo
 ; de la arena actual (izquierdo [ABLL,ABLH) o su espejo [ABRL,ABRH)).
 BulletInPillar:
+    ; Bala de 2 filas: no choca en el callejon libre.
+    lda TestY
+    cmp #STREET_Y0
+    bcc BulletStreetNotClear
+    cmp #STREET_Y1-1
+    bcs BulletStreetNotClear
+    clc
+    rts
+BulletStreetNotClear:
     lda TestY
     clc
     adc #1                  ; BulletY >= Y0-1

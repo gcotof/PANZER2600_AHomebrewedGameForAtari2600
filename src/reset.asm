@@ -51,6 +51,7 @@ ClearRAM:
     sta Tank2Y
     lda #6
     sta Facing2
+    lda #12
     sta Turret2Facing
     lda #TANK2_COLOR
     sta COLUP1
