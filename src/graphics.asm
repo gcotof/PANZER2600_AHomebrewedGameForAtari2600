@@ -1,7 +1,7 @@
     MAC HUD_LINE
     ; Una scanline del marcador, playfield sin espejo (CTRLPF=0).
     ; Parametros: {1}=PF0 izq, {2}=PF1 izq, {3}=PF2 izq, {4}=PF1 der, {5}=PF2 der,
-    ;             {6}=color izq, {7}=color der, {8}=PF0 der (valor inmediato).
+    ;             {6}=color izq, {7}=color der, {8}=PF0 der (variable).
     ; La mitad izquierda se arma al inicio de la linea; a mitad de linea se
     ; reescriben PF0/PF1/COLUPF/PF2 para la mitad derecha.
     ; Ventanas (ciclo de CPU): PF0 der [28..49], PF1 der [39..54], COLUPF [43..55], PF2 der [50..66].
@@ -13,7 +13,7 @@
     sta PF1
     lda {3}
     sta PF2
-    lda #{8}
+    lda {8}
     sta PF0
     lda #0
     sta CTRLPF
@@ -85,11 +85,11 @@
     ; Muro superior: PF completo (se activa en VBLANK, ver frame.asm).
     KERNEL_LINES 1
     ; Marcador: 2 filas de kernel = 4 scanlines (sin objetos: filas vacias).
-    HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,$10
-    HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,$10
+    HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,HudDR0
+    HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,HudDR0
     inx
-    HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,0
-    HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,0
+    HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,HudR0
+    HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,HudR0
     inx
     ; Fila 4: muro completo otra vez (espejo y color de muro).
     lda #WALL_COLOR

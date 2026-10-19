@@ -76,11 +76,13 @@ StartRound:
     sta BulletY
     rts
 
-; Marcador (2 filas de kernel):
+; Marcador (2 filas de kernel), dentro del marco de muros:
 ;  fila A: TODAS las casillas (WIN_SCORE por jugador) en gris + divisor central.
-;  fila B: casillas ganadas en el color de cada jugador. Las casillas que solo
-;  aparecen grises son las victorias que faltan.
-; J1 crece desde el borde izquierdo (PF0,PF1,PF2); J2 desde el borde derecho (PF2,PF1).
+;  fila B: casillas ganadas en el color de cada jugador.
+; Las casillas que solo aparecen grises son las victorias que faltan.
+; J1 crece desde el muro izquierdo (PF0 bit6, PF1, PF2), J2 desde el derecho
+; (PF2, PF1, PF0 bit7). Las tablas incluyen el bit del muro lateral
+; (PF0 bit4 a la izquierda = x0..3; PF2 bit7 a la derecha = x156..159).
 PrepHud:
     ldx Score1
     cpx #9
@@ -98,11 +100,21 @@ PrepHud1:
     bcc PrepHud2
     ldx #8
 PrepHud2:
+    lda PipR0,x
+    sta HudR0
     lda PipR1,x
     sta HudR1
     lda PipR2,x
     sta HudR2
-    ; fila A: casillas totales + divisor (PF2 izq. bit 7 y PF0 der. bit 4 = x76..83)
+    IF HUD_B_WALLS == 0
+    lda HudL0
+    and #$EF
+    sta HudL0
+    lda HudR2
+    and #$7F
+    sta HudR2
+    ENDIF
+    ; fila A: casillas totales + divisor (PF2 izq. bit7 y PF0 der. bit4 = x76..83)
     lda PipL0+WIN_SCORE
     sta HudDL0
     lda PipL1+WIN_SCORE
@@ -110,6 +122,9 @@ PrepHud2:
     lda PipL2+WIN_SCORE
     ora #$80
     sta HudDL2
+    lda PipR0+WIN_SCORE
+    ora #$10
+    sta HudDR0
     lda PipR1+WIN_SCORE
     sta HudDR1
     lda PipR2+WIN_SCORE
@@ -117,14 +132,16 @@ PrepHud2:
     rts
 
 PipL0:
-    .byte $00,$10,$50,$50,$50,$50,$50,$50,$50
+    .byte $10,$50,$50,$50,$50,$50,$50,$50,$50
 PipL1:
-    .byte $00,$00,$00,$80,$A0,$A8,$AA,$AA,$AA
+    .byte $00,$00,$80,$A0,$A8,$AA,$AA,$AA,$AA
 PipL2:
-    .byte $00,$00,$00,$00,$00,$00,$00,$01,$05
-PipR2:
-    .byte $00,$80,$A0,$A8,$AA,$AA,$AA,$AA,$AA
+    .byte $00,$00,$00,$00,$00,$00,$01,$05,$15
+PipR0:
+    .byte $00,$00,$00,$00,$00,$00,$00,$00,$80
 PipR1:
-    .byte $00,$00,$00,$00,$00,$01,$05,$15,$55
+    .byte $00,$00,$00,$00,$01,$05,$15,$55,$55
+PipR2:
+    .byte $80,$A0,$A8,$AA,$AA,$AA,$AA,$AA,$AA
 WinnerColors:
     .byte HUD_P1_COLOR,TANK2_COLOR

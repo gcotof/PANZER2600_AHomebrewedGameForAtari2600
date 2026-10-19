@@ -84,3 +84,5 @@ HudDL1 = $DE
 HudDL2 = $DF
 HudDR1 = $E0
 HudDR2 = $E1
+HudR0 = $E2
+HudDR0 = $E3

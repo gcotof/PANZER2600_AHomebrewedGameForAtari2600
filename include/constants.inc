@@ -81,4 +81,5 @@ ROUND_PAUSE    = 90    ; frames de pausa tras cada punto (90 = 1.5 s)
 VICTORY_PAUSE  = 240   ; frames de pantalla de victoria (4 s)
 HUD_P1_COLOR   = $88   ; color de las casillas del J1 y del destello si gana el J1
 HIDDEN_Y       = 200   ; Y fuera de pantalla para el tanque destruido
-HUD_DIM_COLOR  = $06   ; color de las casillas vacias y del divisor central
+HUD_DIM_COLOR  = WALL_COLOR   ; casillas vacias y divisor: mismo gris que los muros
+HUD_B_WALLS    = 1             ; 1 = el muro lateral de la fila de color toma el color del jugador; 0 = sin muro ahi
