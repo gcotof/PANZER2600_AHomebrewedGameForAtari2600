@@ -86,3 +86,25 @@ HudDR1 = $E0
 HudDR2 = $E1
 HudR0 = $E2
 HudDR0 = $E3
+
+; --- Milestone 2.8: arenas ---
+ArenaMode = $E4   ; 1 = pantalla de seleccion, 0 = partida
+ArenaSel  = $E5   ; arena elegida para toda la partida (indice en ArenaTable)
+WallColor = $E6   ; color del playfield (gris; en seleccion indica de quien es la vista previa)
+ArenaY0   = $E7   ; filas de kernel donde empieza/termina el obstaculo
+ArenaY1   = $E8
+ArenaPF2  = $E9   ; bits de PF2 del obstaculo (mitad izquierda; la derecha es el espejo)
+ATLL = $EA        ; limites X del tanque (origen) en el obstaculo izquierdo [LL,LH)
+ATLH = $EB
+ATRL = $EC        ; ... y en el derecho [RL,RH)
+ATRH = $ED
+ABLL = $EE        ; lo mismo para la bala
+ABLH = $EF
+ABRL = $F0
+ABRH = $F1
+SelVote0 = $F2    ; voto de J1 / J2 (0..ARENA_COUNT-1)
+SelVote1 = $F3
+SelConf0 = $F4    ; 1 = voto confirmado
+SelConf1 = $F5
+SelDelay0 = $F6   ; repeticion al mantener izquierda/derecha
+SelDelay1 = $F7   ; (la pila vive en $F8..$FF: no usar mas RAM)

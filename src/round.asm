@@ -43,10 +43,13 @@ EndPause:
     sta Score1
     sta Score2
     sta Winner
+    jmp EnterSelect         ; 2.8.5: nueva partida -> nueva votacion de arena
 StartRound:
-    lda #56
+    lda ArenaSel            ; 2.8.7: la geometria se restablece en CADA ronda
+    jsr LoadArena           ; (la arena elegida se mantiene toda la partida: 2.8.6)
+    lda #P1_START_X
     sta TankX
-    lda #120
+    lda #P2_START_X
     sta Tank2X
     lda #START_Y
     sta TankY

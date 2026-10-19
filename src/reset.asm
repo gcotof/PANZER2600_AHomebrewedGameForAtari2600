@@ -44,7 +44,8 @@ ClearRAM:
     sta PF0
     lda #WALL_COLOR
     sta COLUPF
-    lda #120
+    sta WallColor
+    lda #P2_START_X
     sta Tank2X
     lda #START_Y
     sta Tank2Y
@@ -57,4 +58,6 @@ ClearRAM:
     sta COLUP0
     lda #$22
     sta COLUBK
-
+    lda #0
+    jsr LoadArena          ; geometria por defecto (arena 0)
+    jsr EnterSelect        ; 2.8.5: la partida empieza en la pantalla de seleccion

@@ -77,13 +77,13 @@
 .StoreTank2:
     sta TargetByte
 
-    cpx #{1}
+    cpx {1}
     sta WSYNC
     bne .Visible
     ENDM
 
     ; Muro superior: PF completo (se activa en VBLANK, ver frame.asm).
-    KERNEL_LINES 1
+    KERNEL_LINES #1
     ; Marcador: 2 filas de kernel = 4 scanlines (sin objetos: filas vacias).
     HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,HudDR0
     HUD_LINE HudDL0,HudDL1,HudDL2,HudDR1,HudDR2,HUD_DIM_COLOR,HUD_DIM_COLOR,HudDR0
@@ -92,7 +92,7 @@
     HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,HudR0
     inx
     ; Fila 4: muro completo otra vez (espejo y color de muro).
-    lda #WALL_COLOR
+    lda WallColor
     sta COLUPF
     lda #$F0
     sta PF0
@@ -101,25 +101,25 @@
     sta PF2
     lda #PF_MIRROR
     sta CTRLPF
-    KERNEL_LINES WALL_TOP_ROWS
+    KERNEL_LINES #WALL_TOP_ROWS
     lda #WALL_PF0          ; vuelve a muros laterales
     sta PF0
     lda #0
     sta PF1
     sta PF2
-    KERNEL_LINES CWALL_Y0
-    lda #CWALL_PF2
+    KERNEL_LINES ArenaY0
+    lda ArenaPF2
     sta PF2
-    KERNEL_LINES CWALL_Y1
+    KERNEL_LINES ArenaY1
     lda #0
     sta PF2
-    KERNEL_LINES WALL_BOT_START
+    KERNEL_LINES #WALL_BOT_START
     lda #$F0               ; muro inferior: PF completo
     sta PF0
     lda #$FF
     sta PF1
     sta PF2
-    KERNEL_LINES KERNEL_ROWS
+    KERNEL_LINES #KERNEL_ROWS
 
     lda #0
     sta GRP0

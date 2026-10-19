@@ -39,19 +39,17 @@ BULLET_MIN_X    = WALL_LEFT_EDGE + M0_OFFSET    ; 20: por debajo toca x<=3
 BULLET_MAX_X    = WALL_RIGHT_EDGE + M0_OFFSET   ; 172: desde aqui toca x>=156
 TANK2_COLOR = $C8
 
-CWALL_PF2   = $C0
-CWALL_X0    = 72
-CWALL_X1    = 88
-CWALL_Y0    = 32
-CWALL_Y1    = 64
-CWALL_TANK_X_LO = CWALL_X0 + P0_OFFSET - SPRITE_W + 1
-CWALL_TANK_X_HI = CWALL_X1 + P0_OFFSET
-CWALL_TANK_Y_LO = CWALL_Y0 - SPRITE_W + 1
-CWALL_TANK_Y_HI = CWALL_Y1
-CWALL_BUL_X_LO  = CWALL_X0 + M0_OFFSET
-CWALL_BUL_X_HI  = CWALL_X1 + M0_OFFSET
-CWALL_BUL_Y_LO  = CWALL_Y0 - 1
-CWALL_BUL_Y_HI  = CWALL_Y1
+; --- Arenas (2.8) ---
+; Cada arena = un obstaculo en la mitad izquierda [X0,X1) (x en pixeles de pantalla,
+; X1 <= 80) y su ESPEJO en la derecha, entre las filas de kernel Y0..Y1.
+; Se dibuja con PF2 (4 px por bit: bit k = x 48+4k). Ver ArenaTable en src/arena.asm.
+; Las arenas son simetricas izquierda/derecha y centradas en vertical (Y0+Y1 = 96).
+ARENA_COUNT     = 3
+SEL_START_WAIT  = 40     ; frames sin leer botones al entrar a la seleccion (evita confirmar sin querer)
+SEL_REPEAT      = 15     ; frames entre cambios de voto al mantener el joystick
+SEL_REVEAL      = 60     ; frames mostrando la arena elegida antes de la primera ronda
+P2_START_X      = 126    ; espejo exacto del J1 (TankX 56): 160 - (56-15) - 8 + 15
+P1_START_X      = 56
 
 ; --- Vertical: kernel REAL de 2 scanlines por fila (96 filas = 192 lineas) ---
 ; 1 unidad de Y = 2 scanlines. Antes cada fila tardaba ~83 ciclos (>76) y el

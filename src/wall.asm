@@ -2,15 +2,11 @@ UpdateWall:
     lda BulletActive
     beq WallDone
     lda BulletX
-    cmp #CWALL_BUL_X_LO
-    bcc SideWalls
-    cmp #CWALL_BUL_X_HI
-    bcs SideWalls
+    sta TestX
     lda BulletY
-    cmp #CWALL_BUL_Y_LO
+    sta TestY
+    jsr BulletInPillar
     bcc SideWalls
-    cmp #CWALL_BUL_Y_HI
-    bcs SideWalls
     jmp PillarHit
 SideWalls:
     lda BulletDX
@@ -95,20 +91,30 @@ PillarNoX:
 PillarNoY:
     jmp RestorePos
 
-; Entrada: TestX, TestY (origen de la bala). Salida: C=1 si esta dentro del pilar.
+; Entrada: TestX, TestY (origen de la bala). Salida: C=1 si esta dentro de un obstaculo
+; de la arena actual (izquierdo [ABLL,ABLH) o su espejo [ABRL,ABRH)).
 BulletInPillar:
-    lda TestX
-    cmp #CWALL_BUL_X_LO
-    bcc PillarOut
-    cmp #CWALL_BUL_X_HI
-    bcs PillarOut
     lda TestY
-    cmp #CWALL_BUL_Y_LO
+    clc
+    adc #1                  ; BulletY >= Y0-1
+    cmp ArenaY0
     bcc PillarOut
-    cmp #CWALL_BUL_Y_HI
+    lda TestY
+    cmp ArenaY1
     bcs PillarOut
-    sec
-    rts
+    lda TestX
+    cmp ABLL
+    bcc BulRightRect
+    cmp ABLH
+    bcc PillarIn
+BulRightRect:
+    cmp ABRL
+    bcc PillarOut
+    cmp ABRH
+    bcc PillarIn
 PillarOut:
     clc
+    rts
+PillarIn:
+    sec
     rts

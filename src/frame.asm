@@ -10,6 +10,11 @@ Frame:
     lda #43
     sta TIM64T
 
+    lda ArenaMode
+    beq NotSelecting
+    jsr ArenaSelectFrame    ; 2.8.3-2.8.5: votacion de arena
+    jmp FrameLogicDone
+NotSelecting:
     lda PauseFrames
     beq PlayFrame
     dec PauseFrames

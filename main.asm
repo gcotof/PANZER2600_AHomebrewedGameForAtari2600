@@ -26,6 +26,7 @@
     include "src/bullet.asm"
     include "src/target.asm"
     include "src/wall.asm"
+    include "src/arena.asm"
     include "src/directions.asm"
     include "src/position.asm"
     include "src/sprites.asm"

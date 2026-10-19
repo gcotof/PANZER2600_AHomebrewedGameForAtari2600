@@ -94,18 +94,27 @@ SkipX:
 SkipY:
     rts
 TankHitsWall:
-    lda TestX
-    cmp #CWALL_TANK_X_LO
-    bcc NoWallHit
-    cmp #CWALL_TANK_X_HI
-    bcs NoWallHit
     lda TestY
-    cmp #CWALL_TANK_Y_LO
+    clc
+    adc #7                  ; TestY >= Y0-7 (el sprite mide 8 filas)
+    cmp ArenaY0
     bcc NoWallHit
-    cmp #CWALL_TANK_Y_HI
+    lda TestY
+    cmp ArenaY1
     bcs NoWallHit
-    sec
-    rts
+    lda TestX
+    cmp ATLL
+    bcc TankRightRect
+    cmp ATLH
+    bcc TankWallYes
+TankRightRect:
+    cmp ATRL
+    bcc NoWallHit
+    cmp ATRH
+    bcc TankWallYes
 NoWallHit:
     clc
+    rts
+TankWallYes:
+    sec
     rts
