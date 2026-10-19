@@ -46,6 +46,7 @@ TANK2_COLOR = $C8
 ; Las arenas son simetricas izquierda/derecha y centradas en vertical (Y0+Y1 = 96).
 ARENA_COUNT     = 3
 ; Dos edificios separados por un callejon horizontal, compartido por las 3 arenas.
+; Coordenadas de kernel (Y) y no pixeles de pantalla.
 STREET_Y0       = 42
 STREET_Y1       = 54
 SEL_START_WAIT  = 40     ; frames sin leer botones al entrar a la seleccion (evita confirmar sin querer)
