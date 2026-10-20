@@ -104,3 +104,15 @@ TH          = $F0   ; ($F1..$F7 libres; la pila vive en $F8..$FF)
 
 SelFireWait = $F1   ; 1 = esperar a soltar el boton antes de confirmar arena
 SelDirHeld  = $F2   ; 1 = direccion ya procesada (un cambio por pulsacion)
+
+; --- Sonido (2.10): vive en el banco 1 (src/bank1.asm) ---
+; RAM reutilizada: Target* ($A3,$A4,$A6,$A7) ya no se usa (target.asm es codigo muerto).
+PrevB1   = $A3   ; Bnc previo J1 (detecta rebotes)
+PrevB2   = $A4
+PrevSc   = $A6   ; Score1+Score2 previo (detecta impactos)
+PrevFl   = $A7   ; bits previos: 0 FireLatch1, 1 FireLatch2, 2 Winner, 3 menu de arena
+PrevMap  = $F7
+Snd0Ptr  = $F3   ; canal 0: indice en SfxData
+Snd1Ptr  = $F4
+Snd0Time = $F5   ; frames que quedan del paso actual
+Snd1Time = $F6

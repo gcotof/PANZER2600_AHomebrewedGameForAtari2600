@@ -207,6 +207,8 @@ Overscan:
     lda #37                 ; ~30 lineas de overscan: aqui corre la logica del juego
     sta TIM64T
     jsr GameLogic
+SoundCall:
+    lda $FFF9               ; cambia al banco 1 (sonido); vuelve aqui+3 (ver src/bank1.asm)
 OverWait:
     lda INTIM
     bne OverWait

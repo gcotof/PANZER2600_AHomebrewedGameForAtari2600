@@ -34,3 +34,4 @@
     include "src/position.asm"
     include "src/sprites.asm"
     include "src/vectors.asm"
+    include "src/bank1.asm"

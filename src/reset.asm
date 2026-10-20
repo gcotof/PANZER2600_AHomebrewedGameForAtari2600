@@ -2,6 +2,7 @@
 Reset:
     sei
     cld
+    lda $FFF8               ; fuerza el banco 0 (arranque en cualquier banco). Mismos bytes en bank1.asm
     ldx #0
     txa
 ClearRAM:
