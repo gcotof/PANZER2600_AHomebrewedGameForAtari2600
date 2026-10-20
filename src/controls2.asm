@@ -112,9 +112,10 @@ OnlyX2:
     sta StepY
 MoveNow2:
 ApplyStep2:
-    lda Tank2X
+    lda StepX
+    beq Skip2X
     clc
-    adc StepX
+    adc Tank2X
     cmp #TANK_MIN_X
     bcc Skip2X
     cmp #TANK_MAX_X
@@ -122,14 +123,15 @@ ApplyStep2:
     sta TestX
     lda Tank2Y
     sta TestY
-    jsr TankHitsWall
+    jsr TankHitsX
     bcs Skip2X
     lda TestX
     sta Tank2X
 Skip2X:
-    lda Tank2Y
+    lda StepY
+    beq Skip2Y
     clc
-    adc StepY
+    adc Tank2Y
     cmp #TANK_MIN_Y
     bcc Skip2Y
     cmp #TANK_MAX_Y
@@ -137,7 +139,7 @@ Skip2X:
     sta TestY
     lda Tank2X
     sta TestX
-    jsr TankHitsWall
+    jsr TankHitsY
     bcs Skip2Y
     lda TestY
     sta Tank2Y

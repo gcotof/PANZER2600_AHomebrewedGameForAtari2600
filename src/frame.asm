@@ -7,40 +7,35 @@ Frame:
     sta WSYNC
     lda #0
     sta VSYNC
-    lda #43
+    lda #41                 ; VBLANK (el trabajo de Frame cabe holgado)
     sta TIM64T
+    lda TitleActive
+    beq NotTitle
+    cmp #1
+    bne NotTitle            ; 2 = seleccion de arena: dibuja el juego
+    jmp TitleFrame
+NotTitle:
 
-    lda ArenaMode
-    beq NotSelecting
-    jsr ArenaSelectFrame    ; 2.8.3-2.8.5: votacion de arena
-    jmp FrameLogicDone
-NotSelecting:
+    ; Retroceso del J1 aqui y el del J2 en el overscan: reparte la carga entre VBLANK y overscan.
     lda PauseFrames
-    beq PlayFrame
-    dec PauseFrames
-    bne FrameLogicDone
-    jsr EndPause
-    jmp FrameLogicDone
-PlayFrame:
+    bne NoRecoil
+    lda TitleActive
+    bne NoRecoil            ; en seleccion los tanques no se mueven
     jsr Controls
     jsr Controls2
-    jsr LoadSlot1
-    jsr HandleFire
-    jsr UpdateBullet
-    jsr UpdateWall
-    jsr UpdateHits
-    jsr SaveSlot1
-    jsr LoadSlot2
-    jsr HandleFire2
-    jsr UpdateBullet
-    jsr UpdateWall
-    jsr UpdateHits
-    jsr SaveSlot2
     jsr UpdateRecoil
-    jsr UpdateRecoil2
-    jsr PickDraw
-FrameLogicDone:
+NoRecoil:
+
     jsr PrepHud
+
+    ; Banda 0 del mapa lista para el kernel; BandIdx apunta a la banda 1.
+    ldy MapBase
+    lda MapPF1,y
+    sta PF1Cur
+    lda MapPF2,y
+    sta PF2Cur
+    iny
+    sty BandIdx
 
     ; Color del tanque: se aclara mientras se carga el disparo.
     lda FireCharge

@@ -1,15 +1,15 @@
-# ARMOR DUEL 2600 - build con DASM + Stella
+# PANZER 2600 - build con DASM + Stella
 DASM   ?= dasm
 STELLA ?= stella
 BUILD  := build
-ROM    := $(BUILD)/armor_duel.bin
-LIST   := $(BUILD)/armor_duel.lst
-SYMS   := $(BUILD)/armor_duel.sym
+ROM    := $(BUILD)/panzer2600.bin
+LIST   := $(BUILD)/panzer2600.lst
+SYMS   := $(BUILD)/panzer2600.sym
 ORIG   := $(BUILD)/original.bin
 SOURCES := main.asm $(wildcard src/*.asm) $(wildcard include/*.inc)
 
 .DEFAULT_GOAL := all
-.PHONY: all run debug timing compare clean help
+.PHONY: maps all run debug timing compare clean help
 
 all: $(ROM)
 
@@ -32,7 +32,7 @@ $(ORIG): original/main.asm | $(BUILD)
 	$(DASM) original/main.asm -f3 -o$(ORIG)
 
 timing: $(ROM)
-	@echo "=== ARMOR DUEL: prueba de sincronizacion ==="
+	@echo "=== PANZER: prueba de sincronizacion ==="
 	@echo "1. Abrir Stella con: make run"
 	@echo "2. Abrir debugger de Stella (tecla de acceso al debugger o menu Debugger, segun configuracion)."
 	@echo "3. Consultar scanlines/frame y cycles/scanline en el debugger."
@@ -54,3 +54,6 @@ help:
 	@echo "make compare  - Comparar ROM modular con original"
 	@echo "make clean    - Limpiar build/"
 	@echo "make help     - Mostrar esta ayuda"
+
+maps:
+	python3 tools/genmaps.py

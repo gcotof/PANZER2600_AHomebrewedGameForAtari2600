@@ -87,24 +87,20 @@ HudDR2 = $E1
 HudR0 = $E2
 HudDR0 = $E3
 
-; --- Milestone 2.8: arenas ---
-ArenaMode = $E4   ; 1 = pantalla de seleccion, 0 = partida
-ArenaSel  = $E5   ; arena elegida para toda la partida (indice en ArenaTable)
-WallColor = $E6   ; color del playfield (gris; en seleccion indica de quien es la vista previa)
-ArenaY0   = $E7   ; filas de kernel donde empieza/termina el obstaculo
-ArenaY1   = $E8
-ArenaPF2  = $E9   ; bits de PF2 del obstaculo (mitad izquierda; la derecha es el espejo)
-ATLL = $EA        ; limites X del tanque (origen) en el obstaculo izquierdo [LL,LH)
-ATLH = $EB
-ATRL = $EC        ; ... y en el derecho [RL,RH)
-ATRH = $ED
-ABLL = $EE        ; lo mismo para la bala
-ABLH = $EF
-ABRL = $F0
-ABRH = $F1
-SelVote0 = $F2    ; voto de J1 / J2 (0..ARENA_COUNT-1)
-SelVote1 = $F3
-SelConf0 = $F4    ; 1 = voto confirmado
-SelConf1 = $F5
-SelDelay0 = $F6   ; repeticion al mantener izquierda/derecha
-SelDelay1 = $F7   ; (la pila vive en $F8..$FF: no usar mas RAM)
+; --- Milestone 2.9: mapas por bandas de playfield ---
+MapNum  = $E4   ; mapa actual (0..MAP_COUNT-1)
+MapBase = $E5   ; MapNum*MAP_BANDS: indice de su banda 0 en MapPF1/MapPF2
+BandIdx = $E6   ; kernel: siguiente banda a cargar
+PF1Cur  = $E7   ; kernel: PF1/PF2 de la banda en pantalla
+PF2Cur  = $E8
+WallCol = $E9   ; temporales de colision por celdas
+WallEnd = $EA   ; la pila vive en $F8..$FF)
+TitleActive = $EB   ; 1 = pantalla de titulo
+TBase       = $EC   ; color base animado del titulo
+TCol        = $ED
+TCnt        = $EE
+TLeft       = $EF
+TH          = $F0   ; ($F1..$F7 libres; la pila vive en $F8..$FF)
+
+SelFireWait = $F1   ; 1 = esperar a soltar el boton antes de confirmar arena
+SelDirHeld  = $F2   ; 1 = direccion ya procesada (un cambio por pulsacion)

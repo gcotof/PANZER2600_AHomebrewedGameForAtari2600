@@ -1,4 +1,4 @@
-; ARMOR DUEL 2600 - Milestone 2.5C: muros 4 lados, kernel de 2 lineas, bala gris, frenado al cargar
+; PANZER 2600 - Milestone 2.9: mapas por bandas estilo Combat, un mapa distinto cada ronda
 ; Joystick: up/down drive, left/right hull, fire+left/right turret.
 ; Hold fire (without turning the turret) for FIRE_HOLD frames to shoot.
 ; Rotating the turret resets the charge. The tank brightens while charging.
@@ -22,11 +22,14 @@
     include "src/hits.asm"
     include "src/slots.asm"
     include "src/round.asm"
+    include "src/logic.asm"
+    include "src/title.asm"
+    include "src/titledata.asm"
     include "src/recoil.asm"
     include "src/bullet.asm"
     include "src/target.asm"
     include "src/wall.asm"
-    include "src/arena.asm"
+    include "src/maps.asm"
     include "src/directions.asm"
     include "src/position.asm"
     include "src/sprites.asm"

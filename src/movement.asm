@@ -62,9 +62,10 @@ MoveNow:
     jsr ApplyStep
     rts
 ApplyStep:
-    lda TankX
+    lda StepX
+    beq SkipX
     clc
-    adc StepX
+    adc TankX
     cmp #TANK_MIN_X
     bcc SkipX
     cmp #TANK_MAX_X
@@ -72,14 +73,15 @@ ApplyStep:
     sta TestX
     lda TankY
     sta TestY
-    jsr TankHitsWall
+    jsr TankHitsX
     bcs SkipX
     lda TestX
     sta TankX
 SkipX:
-    lda TankY
+    lda StepY
+    beq SkipY
     clc
-    adc StepY
+    adc TankY
     cmp #TANK_MIN_Y
     bcc SkipY
     cmp #TANK_MAX_Y
@@ -87,43 +89,9 @@ SkipX:
     sta TestY
     lda TankX
     sta TestX
-    jsr TankHitsWall
+    jsr TankHitsY
     bcs SkipY
     lda TestY
     sta TankY
 SkipY:
-    rts
-TankHitsWall:
-    ; Callejon libre solo si el sprite completo (8 filas) cabe dentro.
-    lda TestY
-    cmp #STREET_Y0
-    bcc TankStreetNotClear
-    cmp #STREET_Y1-7
-    bcs TankStreetNotClear
-    clc
-    rts
-TankStreetNotClear:
-    lda TestY
-    clc
-    adc #7                  ; TestY >= Y0-7 (el sprite mide 8 filas)
-    cmp ArenaY0
-    bcc NoWallHit
-    lda TestY
-    cmp ArenaY1
-    bcs NoWallHit
-    lda TestX
-    cmp ATLL
-    bcc TankRightRect
-    cmp ATLH
-    bcc TankWallYes
-TankRightRect:
-    cmp ATRL
-    bcc NoWallHit
-    cmp ATRH
-    bcc TankWallYes
-NoWallHit:
-    clc
-    rts
-TankWallYes:
-    sec
     rts

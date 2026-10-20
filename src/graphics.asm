@@ -82,6 +82,80 @@
     bne .Visible
     ENDM
 
+    MAC PLAY_LINES
+; Como KERNEL_LINES, pero en la linea A reescribe PF1/PF2 desde PF1Cur/PF2Cur y cada
+; 4 filas carga la banda siguiente del mapa (cabe en el hueco de la linea A).
+; Y llega precargado con PF1Cur (lo deja la linea B de la fila anterior).
+; Una iteracion = 2 scanlines exactas:
+;  linea A: escribe GRP0/ENABL/GRP1 (datos calculados en la iteracion anterior)
+;  linea B: calcula los datos de la siguiente fila (cabe holgado en 76 ciclos)
+.Visible:
+    lda TankByte
+    sta GRP0
+    lda MissileVal
+    sta ENABL              ; la bala es el Ball (color = COLUPF = gris)
+    lda TargetByte
+    sta GRP1
+    sty PF1                ; ciclo ~23 (limite PF1 izq: 28)
+    lda PF2Cur
+    sta PF2
+    txa
+    and #3
+    cmp #3                 ; X = 3 mod 4: la fila siguiente empieza banda nueva
+    bne .NoBand
+    ldy BandIdx
+    lda MapPF1,y
+    sta PF1Cur
+    lda MapPF2,y
+    sta PF2Cur
+    inc BandIdx
+.NoBand:
+    sta WSYNC
+
+    inx
+
+    ldy #0
+    txa
+    sec
+    sbc BulletY
+    cmp #2
+    bcs .NoBulletRow
+    ldy #2
+.NoBulletRow:
+    sty MissileVal
+
+    txa
+    sec
+    sbc TankY
+    cmp #8
+    bcc .InTank
+    lda #0
+    beq .StoreTank
+.InTank:
+    tay
+    lda CompositeRows,y
+.StoreTank:
+    sta TankByte
+
+    txa
+    sec
+    sbc Tank2Y
+    cmp #8
+    bcc .InTank2
+    lda #0
+    beq .StoreTank2
+.InTank2:
+    tay
+    lda Tank2Rows,y
+.StoreTank2:
+    sta TargetByte
+
+    ldy PF1Cur             ; precarga para la linea A siguiente (antes del cpx: ldy cambia los flags)
+    cpx {1}
+    sta WSYNC
+    bne .Visible
+    ENDM
+
     ; Muro superior: PF completo (se activa en VBLANK, ver frame.asm).
     KERNEL_LINES #1
     ; Marcador: 2 filas de kernel = 4 scanlines (sin objetos: filas vacias).
@@ -92,7 +166,7 @@
     HUD_LINE HudL0,HudL1,HudL2,HudR1,HudR2,HUD_P1_COLOR,TANK2_COLOR,HudR0
     inx
     ; Fila 4: muro completo otra vez (espejo y color de muro).
-    lda WallColor
+    lda #WALL_COLOR
     sta COLUPF
     lda #$F0
     sta PF0
@@ -102,22 +176,18 @@
     lda #PF_MIRROR
     sta CTRLPF
     KERNEL_LINES #WALL_TOP_ROWS
-    lda #WALL_PF0          ; vuelve a muros laterales
+    ; Campo de juego: bandas del mapa (PF0 fijo = muros laterales). La banda 0 ya
+    ; esta en PF1Cur/PF2Cur (la deja Frame en el VBLANK).
+    lda #WALL_PF0
     sta PF0
+    lda PF1Cur
+    sta PF1
+    lda PF2Cur
+    sta PF2
+    ldy PF1Cur              ; Y = PF1Cur para la primera fila
+    PLAY_LINES #PLAY_END_ROW
     lda #0
     sta PF1
-    sta PF2
-    KERNEL_LINES ArenaY0
-    lda ArenaPF2
-    sta PF2
-    KERNEL_LINES #STREET_Y0
-    lda #0                  ; callejon horizontal entre edificios
-    sta PF2
-    KERNEL_LINES #STREET_Y1
-    lda ArenaPF2
-    sta PF2
-    KERNEL_LINES ArenaY1
-    lda #0
     sta PF2
     KERNEL_LINES #WALL_BOT_START
     lda #$F0               ; muro inferior: PF completo
@@ -127,15 +197,18 @@
     sta PF2
     KERNEL_LINES #KERNEL_ROWS
 
+Overscan:
     lda #0
     sta GRP0
     sta ENABL
     sta GRP1
     lda #2
     sta VBLANK
-    ldx #30
-Overscan:
+    lda #37                 ; ~30 lineas de overscan: aqui corre la logica del juego
+    sta TIM64T
+    jsr GameLogic
+OverWait:
+    lda INTIM
+    bne OverWait
     sta WSYNC
-    dex
-    bne Overscan
     jmp Frame

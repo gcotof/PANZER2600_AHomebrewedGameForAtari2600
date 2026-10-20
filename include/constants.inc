@@ -5,7 +5,7 @@ RECOIL_FAST   = 9      ; mientras RecoilFrames >= esto, 2 px por frame (patada f
 LOCK_FRAMES   = 60     ; frames sin poder moverse ni girar tras disparar (60 = 1 s)
 BULLET_SPEED  = 4      ; px por frame de la bala (antes 1 px cada 3 frames)
 FLASH_LEN     = 2      ; frames de destello al disparar
-BG_COLOR      = $22
+BG_COLOR      = $00
 FLASH_COLOR   = $2E
 
 
@@ -39,19 +39,14 @@ BULLET_MIN_X    = WALL_LEFT_EDGE + M0_OFFSET    ; 20: por debajo toca x<=3
 BULLET_MAX_X    = WALL_RIGHT_EDGE + M0_OFFSET   ; 172: desde aqui toca x>=156
 TANK2_COLOR = $C8
 
-; --- Arenas (2.8) ---
-; Cada arena = un obstaculo en la mitad izquierda [X0,X1) (x en pixeles de pantalla,
-; X1 <= 80) y su ESPEJO en la derecha, entre las filas de kernel Y0..Y1.
-; Se dibuja con PF2 (4 px por bit: bit k = x 48+4k). Ver ArenaTable en src/arena.asm.
-; Las arenas son simetricas izquierda/derecha y centradas en vertical (Y0+Y1 = 96).
-ARENA_COUNT     = 3
-; Dos edificios separados por un callejon horizontal, compartido por las 3 arenas.
-; Coordenadas de kernel (Y) y no pixeles de pantalla.
-STREET_Y0       = 42
-STREET_Y1       = 54
-SEL_START_WAIT  = 40     ; frames sin leer botones al entrar a la seleccion (evita confirmar sin querer)
-SEL_REPEAT      = 15     ; frames entre cambios de voto al mantener el joystick
-SEL_REVEAL      = 60     ; frames mostrando la arena elegida antes de la primera ronda
+; --- Mapas (2.9) ---
+; El campo de juego son 22 bandas de 4 filas de kernel (8 scanlines); cada banda
+; trae su PF1/PF2 (espejados). Celdas de 4 px de ancho. Ver src/maps.asm (generado
+; por tools/genmaps.py). Los muros laterales (PF0) son fijos.
+MAP_BANDS       = 23     ; 22 bandas + 1 vacia de relleno
+MAP_COUNT       = 8      ; debe coincidir con tools/genmaps.py
+BAND_ROW0       = 4      ; fila de sprite donde empieza la banda 0 (se dibuja en la iteracion 5)
+INTRO_FRAMES    = 60     ; pausa inicial antes de la ronda 1
 P2_START_X      = 126    ; espejo exacto del J1 (TankX 56): 160 - (56-15) - 8 + 15
 P1_START_X      = 56
 
@@ -61,6 +56,7 @@ P1_START_X      = 56
 KERNEL_ROWS     = 96
 WALL_TOP_ROWS   = 4                      ; fila 1 muro, filas 2..3 marcador, fila 4 muro
 WALL_BOT_START  = KERNEL_ROWS - 2        ; muro inferior: filas 95..96
+PLAY_END_ROW    = KERNEL_ROWS - 3        ; ultima fila del bucle de bandas
 ; La fila donde cambia el playfield (3 arriba, 95 abajo) debe quedar libre de
 ; sprites/bala para que el cambio de PF no corrompa GRP/ENABL.
 TANK_MIN_Y      = 5

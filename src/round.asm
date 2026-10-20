@@ -43,10 +43,11 @@ EndPause:
     sta Score1
     sta Score2
     sta Winner
-    jmp EnterSelect         ; 2.8.5: nueva partida -> nueva votacion de arena
+    lda #1
+    sta TitleActive         ; fin de partida: vuelve al titulo
+    rts
 StartRound:
-    lda ArenaSel            ; 2.8.7: la geometria se restablece en CADA ronda
-    jsr LoadArena           ; (la arena elegida se mantiene toda la partida: 2.8.6)
+InitRound:
     lda #P1_START_X
     sta TankX
     lda #P2_START_X
@@ -149,3 +150,68 @@ PipR2:
     .byte $80,$A0,$A8,$AA,$AA,$AA,$AA,$AA,$AA
 WinnerColors:
     .byte HUD_P1_COLOR,TANK2_COLOR
+
+; --- Seleccion de arena (TitleActive = 2) ---
+; Izquierda/derecha (cualquiera de los dos jugadores) cambia la arena; disparo confirma.
+; Los pips del marcador muestran el numero de arena (1..MAP_COUNT).
+ApplyMap:
+    ldx MapNum
+    lda MapBaseTbl,x
+    sta MapBase
+    inx
+    stx Score1
+    stx Score2
+    rts
+
+SelectLogic:
+    inc FrameCount
+    lda INPT4
+    and INPT4+1
+    bmi SelFireUp
+    lda SelFireWait
+    bne SelDirs             ; sigue pulsado desde el titulo: ignorar
+    lda #0                  ; confirmar: arranca la partida con esta arena
+    sta TitleActive
+    sta Score1
+    sta Score2
+    lda #INTRO_FRAMES
+    sta PauseFrames
+    rts
+SelFireUp:
+    lda #0
+    sta SelFireWait
+SelDirs:
+    lda SWCHA
+    and #$88
+    cmp #$88
+    bne SelRight
+    lda SWCHA
+    and #$44
+    cmp #$44
+    bne SelLeft
+    lda #0
+    sta SelDirHeld
+    rts
+SelRight:
+    lda SelDirHeld
+    bne SelRet
+    inc MapNum
+    lda MapNum
+    cmp #MAP_COUNT
+    bcc SelApply
+    lda #0
+    sta MapNum
+    beq SelApply
+SelLeft:
+    lda SelDirHeld
+    bne SelRet
+    dec MapNum
+    bpl SelApply
+    lda #MAP_COUNT-1
+    sta MapNum
+SelApply:
+    lda #1
+    sta SelDirHeld
+    jmp ApplyMap
+SelRet:
+    rts
